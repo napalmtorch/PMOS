@@ -134,9 +134,6 @@ namespace PMOS
             }
 
             if (CLI != nullptr) { CLI->Execute(); }
-
-            if (Keyboard->IsKeyDown(HAL::Key::A)) { Kernel::Debug.WriteLine("A PRESSED"); }
-            else if (Keyboard->IsKeyUp(HAL::Key::A)) { Kernel::Debug.WriteLine("A RELEASED"); }
         }
 
         void PITCallback(uint* regs)
