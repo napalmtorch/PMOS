@@ -1,0 +1,13 @@
+create 536870912 Disk.img
+format
+mkdir /sys
+mkdir /sys/bin
+mkdir /sys/lib
+mkdir /sys/resources
+add /sys/resources/wallpaper.bmp Disk/sys/resources/wallpaper.bmp
+mkdir /users
+mkdir /users/root
+mkdir /users/public
+save
+unload
+exit
