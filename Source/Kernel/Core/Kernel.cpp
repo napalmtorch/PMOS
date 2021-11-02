@@ -73,7 +73,7 @@ namespace PMOS
             Terminal->Initialize();
             Terminal->Clear();
 
-            Debug.SetMode(DebugMode::All);
+            //Debug.SetMode(DebugMode::All);
 
             ThreadMgr = Threading::ThreadManager();
             ThreadMgr.Initialize();
@@ -95,14 +95,9 @@ namespace PMOS
             CPU.Detect();
             
             PCI.Initialize();
-
-            byte* KBData = (byte*)MemoryMgr.Allocate(512, true, AllocationType::String);
-            Stream* KBStream = new Stream(KBData, 512);
+         
             Keyboard = new HAL::Drivers::PS2Keyboard();
             Keyboard->Initialize();
-            Keyboard->SetStream(KBStream);
-            Keyboard->TerminalOutput = true;
-            Keyboard->OnEnterPressed = CLI->OnEnterPressed;
 
             Mouse = new HAL::Drivers::PS2Mouse();
             Mouse->Initialize();

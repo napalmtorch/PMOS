@@ -8,7 +8,7 @@ namespace PMOS
 
         void MemoryManager::Initialize()
         {
-            MessagesEnabled = false;
+            MessagesEnabled = true;
             uint start = Kernel::GetEndAddress() & 0xFFFFF000;
             start += 0x1000;
             Header.MMapStart = start;

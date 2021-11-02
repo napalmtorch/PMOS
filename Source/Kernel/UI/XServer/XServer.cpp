@@ -29,7 +29,6 @@ namespace PMOS
                 Kernel::Debug.SetMode(DebugMode::Serial);
                 Kernel::CLI->Terminated = true;
                 Kernel::Keyboard->TerminalOutput = false;
-                Kernel::MemoryMgr.Free(Kernel::Keyboard->GetStream());
                 Kernel::Keyboard->SetStream(nullptr);
 
                 Canvas.Initialize();
@@ -43,6 +42,9 @@ namespace PMOS
             void XServerHost::Stop()
             {
                 Service::Stop();
+
+                Kernel::ServiceMgr.Stop(Kernel::WinMgr);
+                Kernel::MemoryMgr.Free(Canvas.Buffer);
             }
 
             void XServerHost::Update()
@@ -69,6 +71,19 @@ namespace PMOS
                     LastDrawTime = DrawTime;
                 }
 
+                // force quit
+                if (Kernel::Keyboard->IsKeyDown(HAL::Key::LeftCtrl) && Kernel::Keyboard->IsKeyDown(HAL::Key::Escape))
+                {
+                    Kernel::ServiceMgr.Stop(Kernel::XServer);
+                    Kernel::ServiceMgr.Start(Kernel::Terminal);
+                    Kernel::ServiceMgr.Start(Kernel::CLI);
+                    Kernel::VESA->ClearDirect(0);
+                    Kernel::Terminal->Clear(Kernel::Terminal->GetBackColor());
+                    Kernel::CLI->PrintCaret();
+                    return;
+                }
+        
+                // draw
                 if (FPSLimit == 0) { Draw(); }
                 if (DrawTick >= 1000 / FPSLimit) { Draw(); DrawTick = 0; }
             }

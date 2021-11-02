@@ -30,6 +30,8 @@ namespace PMOS
         class CommandLine : public Service
         {
             public:
+                Stream KBStream;
+                byte*  KBData;
                 Command** Commands;
                 size_t Count;
                 char* CurrentPath;
@@ -89,5 +91,6 @@ namespace PMOS
         void XSERVER(char* input, Array<char**> args);
         void VESAMODES(char* input, Array<char**> args);
         void RUN(char* input, Array<char**> args);
+        void DUMP(char* input, Array<char**> args);
     }
 }

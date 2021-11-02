@@ -53,6 +53,13 @@ namespace PMOS
             RegisterCommand(Command("XSERVER", "Start graphical user interface", "xserver", CommandMethods::XSERVER));
             RegisterCommand(Command("VESAMODES", "Show list of supported VESA video modes", "veasmodes", CommandMethods::VESAMODES));
             RegisterCommand(Command("RUN", "Run an executable binary file", "run [file]", CommandMethods::RUN));
+            RegisterCommand(Command("DUMP", "Dump memory at specified address", "dump [addr] [size]", CommandMethods::DUMP));
+
+            KBData = (byte*)Kernel::MemoryMgr.Allocate(512, true, AllocationType::String);
+            KBStream = Stream(KBData, 512);
+            Kernel::Keyboard->SetStream(&KBStream);
+            Kernel::Keyboard->TerminalOutput = true;
+            Kernel::Keyboard->OnEnterPressed = OnEnterPressed;
 
             Kernel::Debug.OK("Started command line interface");
         }
@@ -73,6 +80,8 @@ namespace PMOS
             }
 
             if (CurrentPath != nullptr) { Kernel::MemoryMgr.Free(CurrentPath); }
+
+            Kernel::MemoryMgr.Free(KBData);
         }
 
         void CommandLine::PrintCaret()
@@ -462,6 +471,20 @@ namespace PMOS
             if (!exec.Create(header, prog)) { Kernel::CLI->Debug.Error("Unable to run executable"); return; }
             
             Kernel::CLI->Debug.WriteLine("RAM(addr = 0x00000000, size = %d bytes), STACK(addr = 0x%8x, size = %d bytes)", exec.GetRAMSize(), exec.GetStackAddress(), exec.GetStackSize());
+        }
+
+        void DUMP(char* input, Array<char**> args)
+        {
+            if (args.Count < 2) { Kernel::CLI->Debug.Error("Expected address"); return; }
+            if (args.Count < 3) { Kernel::CLI->Debug.Error("Expected size"); return; }
+
+            char* addr_str = args.Data[1];
+            char* size_str = args.Data[2];
+
+            uint addr = String::ToHex(addr_str);
+            uint size = String::ToDecimal(size_str);
+            
+            Kernel::CLI->Debug.DumpMemory((void*)addr, size);
         }
     }
 }

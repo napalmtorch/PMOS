@@ -36,7 +36,11 @@ namespace PMOS
         {
             Service::Stop();
 
-            if (Windows != nullptr) { Kernel::MemoryMgr.FreeArray((void**)Windows, MaxCount); }
+            if (Windows != nullptr) 
+            { 
+                for (uint i = 0; i < MaxCount; i++) { if (Windows[i] != nullptr) { Windows[i]->Dispose(); }}
+                Kernel::MemoryMgr.FreeArray((void**)Windows, MaxCount); 
+            }
             WindowCount = 0;
         }
 

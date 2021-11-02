@@ -6,10 +6,27 @@
 GDTEnable:
     cli
     lgdt [GDTDescriptor]
-    mov  eax, cr0
-    or   eax, 0x1                   ; 3. set 32-bit mode bit in cr0
-    mov  cr0, eax
+    ; mov  eax, cr0
+    ; or   eax, 0x1                   ; 3. set 32-bit mode bit in cr0
+    ; mov  cr0, eax
     jmp  CODE_SEG:InitProtectedMode ; 4. far jump by using a different segment
+
+InitProtectedMode:
+    mov ax, DATA_SEG ; 5. update the segment registers
+    mov ds, ax
+    mov ss, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+
+    mov ebp, StackTop
+    mov esp, ebp
+    
+    call KernelEntry
+
+    cli
+    hlt
+    jmp $
 
 GDTStart: ; don't remove the labels, they're needed to compute sizes and jumps
     ; the GDT starts with a null 8-byte
@@ -46,21 +63,3 @@ GDTDescriptor:
 ; define some constants for later use
 CODE_SEG equ GDTCode - GDTStart
 DATA_SEG equ GDTData - GDTStart
-
-InitProtectedMode:
-    mov ax, DATA_SEG ; 5. update the segment registers
-    mov ds, ax
-    mov ss, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-
-    mov ebp, StackTop
-    mov esp, ebp
-    
-    call KernelEntry
-
-    cli
-    hlt
-    jmp $
-    
