@@ -61,6 +61,8 @@ namespace PMOS
                 void DrawFilledRect(int x, int y, int w, int h, Col32 color);
                 void DrawChar(int x, int y, char c, Col32 fg, Font font);
                 void DrawChar(int x, int y, char c, Col32 fg, Col32 bg, Font font);
+                void DrawString(int x, int y, char* text, Col32 fg, Font font);
+                void DrawString(int x, int y, char* text, Col32 fg, Col32 bg, Font font);
                 Col32 ConvertColor(Col4 color);
         };
 

@@ -262,7 +262,7 @@ namespace PMOS
             Kernel::PITCallback(regs);
             
             // get registers from argument
-            Registers32* r = (Registers32*)*regs;
+            ISRRegs* r = (ISRRegs*)*regs;
 
             // validate thread list
             if (Kernel::ThreadMgr.Count == 0) { return; }

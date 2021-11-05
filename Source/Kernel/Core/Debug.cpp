@@ -193,25 +193,40 @@ namespace PMOS
         if (Mode == DebugMode::Terminal || Mode == DebugMode::All) { Kernel::Terminal->UpdateCursor(); }    
     }
 
-    void Debugger::Panic(char* fmt, ...)
+    void Debugger::Panic(char* str, ISRRegs* regs)
     {
-        Header("  !!  ", Col4::Red);
-        va_list args;
-        va_start(args, fmt);
-        WriteFormatted(fmt, args);
-        va_end(args);
-        NewLine();
-
         asm volatile("cli");
+        Mode = DebugMode::All;
+        Graphics::VESADirectCanvas canvas;
+        canvas.Clear(Colors::DarkRed);
+        canvas.DrawString(0, 0, str, Colors::White, Fonts::Serif8x16);
+        if (Kernel::ThreadMgr.CurrentThread != nullptr)
+        {
+            canvas.DrawString(0, 16, "THREAD: ", Colors::White, Fonts::Serif8x16);
+            canvas.DrawString(72, 16, Kernel::ThreadMgr.CurrentThread->GetName(), Colors::White, Fonts::Serif8x16);
+        }
+
+        DumpRegisters(regs);
         asm volatile("hlt");
     }
     
     void Debugger::Panic(int code)
     {
-        if (code >= ExceptionMsgCount) { code = 0; }
-        Error((char*)ExceptionMsgs[code]);
-
         asm volatile("cli");
+        if (code >= ExceptionMsgCount) { code = 0; }
+        char* fmt = (char*)ExceptionMsgs[code];
+
+        Mode = DebugMode::All;
+
+        Graphics::VESADirectCanvas canvas;
+        canvas.Clear(Colors::DarkRed);
+        canvas.DrawString(0, 0, fmt, Colors::White, Fonts::Serif8x16);
+        if (Kernel::ThreadMgr.CurrentThread != nullptr)
+        {
+            canvas.DrawString(0, 16, "THREAD: ", Colors::White, Fonts::Serif8x16);
+            canvas.DrawString(72, 16, Kernel::ThreadMgr.CurrentThread->GetName(), Colors::White, Fonts::Serif8x16);
+        }
+        
         asm volatile("hlt");
     }
 
@@ -256,5 +271,35 @@ namespace PMOS
             WriteUnformatted(chars, Col4::Yellow);
             NewLine();
         }
+    }
+
+        uint DS;
+        uint EDI, ESI, EBP, EBX, EDX, ECX, EAX;
+        uint Interrupt, ErrorCode;
+        uint EIP, CS, EFlags, UserESP, SS;
+
+    void Debugger::DumpRegisters(ISRRegs* regs)
+    {
+        if (regs == nullptr) { return; }
+
+        Write("DS:  0x%8x ", regs->DS);
+        NewLine();
+        Write("EDI: 0x%8x ", regs->EDI);
+        Write("ESI: 0x%8x ", regs->ESI);
+        Write("EBP: 0x%8x ", regs->EBP);
+        NewLine();
+        Write("EBX: 0x%8x ", regs->EBX);
+        Write("EDX: 0x%8x ", regs->EDX);
+        Write("ECX: 0x%8x ", regs->ECX);
+        Write("EAX: 0x%8x ", regs->EAX);  
+        NewLine();
+        Write("INT: 0x%8x ", regs->Interrupt);
+        Write("ERR: 0x%8x ", regs->ErrorCode);
+        NewLine();
+        Write("EIP: 0x%8x ", regs->EIP);
+        Write("CS:  0x%8x ", regs->CS);
+        Write("EFLAGS: 0x%8x ", regs->EFlags);
+        Write("UESP: 0x%8x ", regs->UserESP);
+        Write("SS:  0x%8x ", regs->SS);
     }
 }

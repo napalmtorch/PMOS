@@ -108,11 +108,11 @@ namespace PMOS
             CLI = new Services::CommandLine();
             CLI->Initialize();
 
-            ATA = new HAL::Drivers::ATAController();
-            ATA->Initialize();
+            //ATA = new HAL::Drivers::ATAController();
+            //ATA->Initialize();
 
-            FileSys = new VFS::FSHost();
-            FileSys->Initialize();
+            //FileSys = new VFS::FSHost();
+            //FileSys->Initialize();
 
             Keyboard->Start();
 
@@ -129,6 +129,8 @@ namespace PMOS
             }
 
             if (CLI != nullptr) { CLI->Execute(); }
+
+            if (CLI->Terminated) { Kernel::ServiceMgr.Stop(CLI); CLI->Terminated = false; }
         }
 
         void PITCallback(uint* regs)

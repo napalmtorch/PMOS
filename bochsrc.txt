@@ -1,9 +1,9 @@
-megs: 256
+megs: 512
+plugin_ctrl: unmapped=true, biosdev=true, speaker=true, extfpuirq=true, parallel=true, serial=true
 
-# display_library: x, options = "gui_debug"
+display_library: x, options="gui_debug"
 
 ata0-master:  type=cdrom, path="PMOS.iso", status=inserted
-ata0-slave:   type=disk, path="Disk.img", cylinders=406, heads=8, spt=63
 
 boot: cdrom
 

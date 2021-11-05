@@ -92,5 +92,6 @@ namespace PMOS
         void VESAMODES(char* input, Array<char**> args);
         void RUN(char* input, Array<char**> args);
         void DUMP(char* input, Array<char**> args);
+        void PANIC(char* input, Array<char**> args);
     }
 }

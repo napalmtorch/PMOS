@@ -35,7 +35,7 @@ namespace PMOS
             Stack = (byte*)Kernel::MemoryMgr.Allocate(StackSize, true, AllocationType::ThreadStack);
 
             // set registers pointer
-            Registers = (Registers32*)(((uint)Stack + StackSize) - sizeof(Registers32));
+            Registers = (ISRRegs*)(((uint)Stack + StackSize) - sizeof(ISRRegs));
 
             // copy name
             for (uint i = 0; i < 64; i++) { if (i < String::Length(name)) { Properties.Name[i] = name[i]; } }
@@ -69,7 +69,7 @@ namespace PMOS
             Stack = (byte*)Kernel::MemoryMgr.Allocate(StackSize, true, AllocationType::ThreadStack);
 
             // set registers pointer
-            Registers = (Registers32*)(((uint)Stack + StackSize) - sizeof(Registers32));
+            Registers = (ISRRegs*)(((uint)Stack + StackSize) - sizeof(ISRRegs));
 
             // copy name
             for (uint i = 0; i < 64; i++) { if (i < String::Length(name)) { Properties.Name[i] = name[i]; } }
@@ -180,7 +180,7 @@ namespace PMOS
         void Thread::ClearStack() { Memory::Set(Stack, 0, StackSize); }
 
         // set thread registers
-        void Thread::SetRegisters(Registers32* regs) { Registers = regs; }
+        void Thread::SetRegisters(ISRRegs* regs) { Registers = regs; }
 
         // get thread name
         char* Thread::GetName() { return Properties.Name; }

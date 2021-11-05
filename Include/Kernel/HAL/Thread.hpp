@@ -49,7 +49,7 @@ namespace PMOS
                 float CPUUsage;
 
             public:
-                Registers32* Registers;
+                ISRRegs* Registers;
                 byte*        Stack;
                 uint         StackSize;
 
@@ -75,7 +75,7 @@ namespace PMOS
 
             public: 
                 void ClearStack();
-                void SetRegisters(Registers32* regs);
+                void SetRegisters(ISRRegs* regs);
 
             public:
                 char* GetName();

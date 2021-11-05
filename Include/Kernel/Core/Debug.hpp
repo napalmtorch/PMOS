@@ -2,6 +2,7 @@
 #include <Kernel/Lib/Types.hpp>
 #include <Kernel/Lib/String.hpp>
 #include <Kernel/Graphics/Graphics.hpp>
+#include <Kernel/HAL/Interrupts/ISR.hpp>
 
 namespace PMOS
 {
@@ -48,8 +49,9 @@ namespace PMOS
             void OK(char* fmt, ...);
             void Warning(char* fmt, ...);
             void Error(char* fmt, ...);
-            void Panic(char* fmt, ...);
+            void Panic(char* str, ISRRegs* regs = nullptr);
             void Panic(int code);
             void DumpMemory(void* ptr, uint len);
+            void DumpRegisters(ISRRegs* regs);
     };
 }

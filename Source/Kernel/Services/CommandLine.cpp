@@ -54,6 +54,7 @@ namespace PMOS
             RegisterCommand(Command("VESAMODES", "Show list of supported VESA video modes", "veasmodes", CommandMethods::VESAMODES));
             RegisterCommand(Command("RUN", "Run an executable binary file", "run [file]", CommandMethods::RUN));
             RegisterCommand(Command("DUMP", "Dump memory at specified address", "dump [addr] [size]", CommandMethods::DUMP));
+            RegisterCommand(Command("PANIC", "Force a kernel level exception", "panic", CommandMethods::PANIC));
 
             KBData = (byte*)Kernel::MemoryMgr.Allocate(512, true, AllocationType::String);
             KBStream = Stream(KBData, 512);
@@ -195,7 +196,6 @@ namespace PMOS
             { 
                 Kernel::Debug.WriteLine("Entering XServer...");
                 Kernel::ServiceMgr.Stop(Kernel::Terminal);
-                Kernel::ServiceMgr.Stop(this); 
                 return;
             }
 
@@ -485,6 +485,11 @@ namespace PMOS
             uint size = String::ToDecimal(size_str);
             
             Kernel::CLI->Debug.DumpMemory((void*)addr, size);
+        }
+
+        void PANIC(char* input, Array<char**> args)
+        {
+            asm volatile("int $80");
         }
     }
 }

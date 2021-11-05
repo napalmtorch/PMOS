@@ -50,6 +50,36 @@ namespace PMOS
             }
         }
 
+        void VESADirectCanvas::DrawString(int x, int y, char* text, Col32 fg, Font font)
+        {
+            if (text == nullptr) { return; }
+            int dx = x, dy = y;
+            for (size_t i = 0; i < String::Length(text); i++)
+            {
+                if (text[i] == '\n') { dx = x; dy += font.Height + font.SpacingY; }
+                else if (text[i] >= 32 && text[i] <= 126)
+                {
+                    DrawChar(dx, dy, text[i], fg, font);
+                    dx += font.Width + font.SpacingX;
+                }
+            }
+        }
+
+        void VESADirectCanvas::DrawString(int x, int y, char* text, Col32 fg, Col32 bg, Font font)
+        {
+            if (text == nullptr) { return; }
+            int dx = x, dy = y;
+            for (size_t i = 0; i < String::Length(text); i++)
+            {
+                if (text[i] == '\n') { dx = x; dy += font.Height + font.SpacingY; }
+                else if (text[i] >= 32 && text[i] <= 126)
+                {
+                    DrawChar(dx, dy, text[i], fg, bg, font);
+                    dx += font.Width + font.SpacingX;
+                }
+            }
+        }
+
         Col32 VESADirectCanvas::ConvertColor(Col4 color)
         {
             switch (color)
@@ -434,6 +464,7 @@ namespace PMOS
 
             for (i = 0; i < num_dwords; i++) { dest32[i] = src32[i]; }
             for (i = 0; i < num_bytes; i++) { dest8[i] = src8[i]; }
+         
         }
 
         // --------------------------------------------------------------------------------------------------------------------------------

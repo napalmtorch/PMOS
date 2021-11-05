@@ -6,9 +6,6 @@
 GDTEnable:
     cli
     lgdt [GDTDescriptor]
-    ; mov  eax, cr0
-    ; or   eax, 0x1                   ; 3. set 32-bit mode bit in cr0
-    ; mov  cr0, eax
     jmp  CODE_SEG:InitProtectedMode ; 4. far jump by using a different segment
 
 InitProtectedMode:

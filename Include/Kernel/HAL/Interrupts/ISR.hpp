@@ -75,10 +75,18 @@ extc
     typedef struct
     {
         uint DS;
-        uint EDI, ESI, EBP, EBX, EDX, ECX, EAX;
+        uint EDI, ESI, EBP, Useless, EBX, EDX, ECX, EAX;
         uint Interrupt, ErrorCode;
         uint EIP, CS, EFlags, UserESP, SS;
     } Registers32;
+
+    typedef struct
+    {
+        uint DS;
+        uint EDI, ESI, EBP, Useless, EBX, EDX, ECX, EAX;
+        uint Interrupt, ErrorCode;
+        uint EIP, CS, EFlags, UserESP, SS;
+    } ISRRegs;
 
     typedef void (*ISR)(uint*);
 }
