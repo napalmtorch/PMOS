@@ -58,6 +58,7 @@ namespace PMOS
 
             MemoryMgr = Services::MemoryManager();
             MemoryMgr.Initialize();
+            MemoryMgr.ToggleMessages(true);
 
             ServiceMgr = Services::ServiceManager();
             ServiceMgr.Initialize();
@@ -108,11 +109,11 @@ namespace PMOS
             CLI = new Services::CommandLine();
             CLI->Initialize();
 
-            //ATA = new HAL::Drivers::ATAController();
-            //ATA->Initialize();
+            ATA = new HAL::Drivers::ATAController();
+            ATA->Initialize();
 
-            //FileSys = new VFS::FSHost();
-            //FileSys->Initialize();
+            FileSys = new VFS::FSHost();
+            FileSys->Initialize();
 
             Keyboard->Start();
 

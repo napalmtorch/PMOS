@@ -50,6 +50,8 @@ namespace PMOS
             RegisterCommand(Command("LSPCI", "Show list of detected PCI devices", "lspci", CommandMethods::LSPCI));
             RegisterCommand(Command("CD", "Set the current directory", "cd [path]", CommandMethods::CD));
             RegisterCommand(Command("DIR", "List contents of directory", "dir [path?] ", CommandMethods::DIR));
+            RegisterCommand(Command("FVIEW", "Print a file to the screen", "fview [path]", CommandMethods::FVIEW));
+            RegisterCommand(Command("FSINFO", "Show properties of file or directory", "fsinfo [path]", CommandMethods::FSINFO));
             RegisterCommand(Command("XSERVER", "Start graphical user interface", "xserver", CommandMethods::XSERVER));
             RegisterCommand(Command("VESAMODES", "Show list of supported VESA video modes", "veasmodes", CommandMethods::VESAMODES));
             RegisterCommand(Command("RUN", "Run an executable binary file", "run [file]", CommandMethods::RUN));
@@ -236,6 +238,19 @@ namespace PMOS
 
     namespace CommandMethods
     {
+        char* GetDepthString(ColDepth depth)
+        {
+            switch (depth)
+            {
+                case ColDepth::Depth4Bit: { return "4 "; }
+                case ColDepth::Depth8Bit: { return "8 "; }
+                case ColDepth::Depth16Bit: { return "16"; }
+                case ColDepth::Depth24Bit: { return "24"; }
+                case ColDepth::Depth32Bit: { return "32"; }
+                default: { return "0"; }
+            }
+        }
+
         void CLS(char* input, Array<char**> args)
         {
             Kernel::Terminal->Clear();
@@ -330,73 +345,12 @@ namespace PMOS
             Kernel::CLI->Debug.Write("CPU USAGE:    %f", (double)cpu);
             Kernel::CLI->Debug.WriteUnformatted("%\n");
             Kernel::CLI->Debug.WriteLine("RAM USAGE:    %d MB(%d bytes)", Kernel::MemoryMgr.GetRAMUsed() / 1024 / 1024, Kernel::MemoryMgr.GetRAMUsed());
-            Kernel::CLI->Debug.WriteLine("HEAP ENTRIES: %d", Kernel::MemoryMgr.GetHeapCount());
+            Kernel::CLI->Debug.WriteLine("HEAP ENTRIES: %d USED/%d TOTAL", Kernel::MemoryMgr.GetUsedHeapCount(), Kernel::MemoryMgr.GetHeapCount());
         }
 
         void LSPCI(char* input, Array<char**> args)
         {
             Kernel::PCI.List(DebugMode::Terminal);
-        }
-
-        void CD(char* input, Array<char**> args)
-        {
-            char* dirname = (char*)Kernel::MemoryMgr.Allocate(String::Length(input), true, AllocationType::String);
-            dirname = String::Copy(dirname, (char*)(input + 3));
-            if (dirname == nullptr) { return; }
-            if (String::Length(dirname) == 0) { Kernel::MemoryMgr.Free(dirname); return; }
-            if (dirname[String::Length(dirname) - 1] == 0x20) { String::Delete(dirname); }
-
-            // input directory is root
-            if (String::Equals(dirname, "/")) 
-            { 
-                Kernel::MemoryMgr.Free(Kernel::CLI->CurrentPath); 
-                Kernel::CLI->CurrentPath = (char*)Kernel::MemoryMgr.Allocate(4, true, AllocationType::String);
-                String::Append(Kernel::CLI->CurrentPath, "/\0");
-                Kernel::MemoryMgr.Free(dirname);
-            }
-            // input directory is a full path
-            else if (dirname[0] == '/')
-            {
-                if (!Kernel::FileSys->IODirectoryExists(dirname)) { Kernel::CLI->Debug.Error("Unable to locate directory %s\n", dirname); Kernel::MemoryMgr.Free(dirname); return; }
-                Kernel::MemoryMgr.Free(Kernel::CLI->CurrentPath);
-                Kernel::CLI->CurrentPath = dirname;
-            }
-            // input directory is a relative path
-            else
-            {
-                char* full_path = (char*)Kernel::MemoryMgr.Allocate(String::Length(dirname) + String::Length(Kernel::CLI->CurrentPath) + 8, true, AllocationType::String);
-                String::Append(full_path, Kernel::CLI->CurrentPath);
-                if (full_path[String::Length(full_path) - 1] != '/') { String::Append(full_path, '/'); }
-                String::Append(full_path, dirname);
-                String::Append(full_path, '\0');
-                if (!Kernel::FileSys->IODirectoryExists(full_path)) { Kernel::CLI->Debug.Error("Unable to locate directory %s\n", dirname); Kernel::MemoryMgr.Free(dirname); Kernel::MemoryMgr.Free(full_path); return; }
-                Kernel::MemoryMgr.Free(Kernel::CLI->CurrentPath);
-                Kernel::CLI->CurrentPath = full_path;
-                Kernel::MemoryMgr.Free(dirname);
-            }
-        }
-
-        void DIR(char* input, Array<char**> args)
-        {
-            // no path provided
-            if (String::Length(input) < 5) { Kernel::FileSys->PrintDirectoryContents(Kernel::CLI->CurrentPath); return; }
-
-            char* dirname = (char*)Kernel::MemoryMgr.Allocate(String::Length(input), true, AllocationType::String);
-            dirname = String::Copy(dirname, (char*)(input + 4));
-            if (dirname[String::Length(dirname) - 1] == 0x20) { String::Delete(dirname); }
-
-            if (dirname != nullptr)
-            {
-                if (String::Length(dirname) > 0)
-                {
-                    char* path = Kernel::CLI->PathToCLIPath(dirname);
-                    if (!Kernel::FileSys->IODirectoryExists(path)) { Kernel::CLI->Debug.Error("Unable to locate directory %s", dirname); }
-                    else { Kernel::FileSys->PrintDirectoryContents(path); }
-                    Kernel::MemoryMgr.Free(path);
-                }
-
-                Kernel::MemoryMgr.Free(dirname);
-            }
         }
 
         void XSERVER(char* input, Array<char**> args)
@@ -409,19 +363,6 @@ namespace PMOS
 
             Kernel::XServer = new UI::XServer::XServerHost();
             Kernel::XServer->Initialize();
-        }
-
-        char* GetDepthString(ColDepth depth)
-        {
-            switch (depth)
-            {
-                case ColDepth::Depth4Bit: { return "4 "; }
-                case ColDepth::Depth8Bit: { return "8 "; }
-                case ColDepth::Depth16Bit: { return "16"; }
-                case ColDepth::Depth24Bit: { return "24"; }
-                case ColDepth::Depth32Bit: { return "32"; }
-                default: { return "0"; }
-            }
         }
 
         void VESAMODES(char* input, Array<char**> args)
@@ -491,5 +432,140 @@ namespace PMOS
         {
             asm volatile("int $80");
         }
+    
+        #pragma region "FileSystem"
+
+        void CD(char* input, Array<char**> args)
+        {
+            char* dirname = (char*)Kernel::MemoryMgr.Allocate(String::Length(input), true, AllocationType::String);
+            dirname = String::Copy(dirname, (char*)(input + 3));
+            if (dirname == nullptr) { return; }
+            if (String::Length(dirname) == 0) { Kernel::MemoryMgr.Free(dirname); return; }
+            if (dirname[String::Length(dirname) - 1] == 0x20) { String::Delete(dirname); }
+
+            // input directory is root
+            if (String::Equals(dirname, "/")) 
+            { 
+                Kernel::MemoryMgr.Free(Kernel::CLI->CurrentPath); 
+                Kernel::CLI->CurrentPath = (char*)Kernel::MemoryMgr.Allocate(4, true, AllocationType::String);
+                String::Append(Kernel::CLI->CurrentPath, "/\0");
+                Kernel::MemoryMgr.Free(dirname);
+            }
+            // input directory is a full path
+            else if (dirname[0] == '/')
+            {
+                if (!Kernel::FileSys->IODirectoryExists(dirname)) { Kernel::CLI->Debug.Error("Unable to locate directory %s\n", dirname); Kernel::MemoryMgr.Free(dirname); return; }
+                Kernel::MemoryMgr.Free(Kernel::CLI->CurrentPath);
+                Kernel::CLI->CurrentPath = dirname;
+            }
+            // input directory is a relative path
+            else
+            {
+                char* full_path = (char*)Kernel::MemoryMgr.Allocate(String::Length(dirname) + String::Length(Kernel::CLI->CurrentPath) + 8, true, AllocationType::String);
+                String::Append(full_path, Kernel::CLI->CurrentPath);
+                if (full_path[String::Length(full_path) - 1] != '/') { String::Append(full_path, '/'); }
+                String::Append(full_path, dirname);
+                String::Append(full_path, '\0');
+                if (!Kernel::FileSys->IODirectoryExists(full_path)) { Kernel::CLI->Debug.Error("Unable to locate directory %s\n", dirname); Kernel::MemoryMgr.Free(dirname); Kernel::MemoryMgr.Free(full_path); return; }
+                Kernel::MemoryMgr.Free(Kernel::CLI->CurrentPath);
+                Kernel::CLI->CurrentPath = full_path;
+                Kernel::MemoryMgr.Free(dirname);
+            }
+        }
+
+        void DIR(char* input, Array<char**> args)
+        {
+            // no path provided
+            if (String::Length(input) < 5) { Kernel::FileSys->PrintDirectoryContents(Kernel::CLI->CurrentPath); return; }
+
+            char* dirname = (char*)Kernel::MemoryMgr.Allocate(String::Length(input), true, AllocationType::String);
+            dirname = String::Copy(dirname, (char*)(input + 4));
+            if (dirname[String::Length(dirname) - 1] == 0x20) { String::Delete(dirname); }
+
+            if (dirname != nullptr)
+            {
+                if (String::Length(dirname) > 0)
+                {
+                    char* path = Kernel::CLI->PathToCLIPath(dirname);
+                    if (!Kernel::FileSys->IODirectoryExists(path)) { Kernel::CLI->Debug.Error("Unable to locate directory %s", dirname); }
+                    else { Kernel::FileSys->PrintDirectoryContents(path); }
+                    Kernel::MemoryMgr.Free(path);
+                }
+
+                Kernel::MemoryMgr.Free(dirname);
+            }
+        }
+
+        void MKDIR(char* input, Array<char**> args)
+        {
+
+        }
+        
+        void FVIEW(char* input, Array<char**> args)
+        {
+            if (args.Count < 2) { Kernel::CLI->Debug.Error("Please specify a file"); return; }
+           
+            char* filename = (char*)Kernel::MemoryMgr.Allocate(String::Length(input), true, AllocationType::String);
+            filename = String::Copy(filename, (char*)(input + 6));
+            if (filename[String::Length(filename) - 1] == 0x20) { String::Delete(filename); }
+
+            if (filename != nullptr)
+            {
+                if (String::Length(filename) > 0)
+                {
+                    char* path = Kernel::CLI->PathToCLIPath(filename);
+                    if (!Kernel::FileSys->IOFileExists(path)) { Kernel::CLI->Debug.Error("Unable to locate file %s", filename); }
+                    else 
+                    { 
+                        char* filedata = Kernel::FileSys->IOReadAllText(path);
+                        Kernel::Terminal->WriteLine(filedata);
+                        Kernel::MemoryMgr.Free(filedata);
+                    }
+                    Kernel::MemoryMgr.Free(path);
+                }
+
+                Kernel::MemoryMgr.Free(filename);
+            }
+        }
+
+        void FSINFO(char* input, Array<char**> args)
+        {
+            if (args.Count < 2) { Kernel::CLI->Debug.Error("Please specify a file or directory"); return; }
+           
+            char* filename = (char*)Kernel::MemoryMgr.Allocate(String::Length(input), true, AllocationType::String);
+            filename = String::Copy(filename, (char*)(input + 7));
+            if (filename[String::Length(filename) - 1] == 0x20) { String::Delete(filename); }
+
+            if (filename != nullptr)
+            {
+                if (String::Length(filename) > 0)
+                {
+                    char* path = Kernel::CLI->PathToCLIPath(filename);
+
+                    if (!Kernel::FileSys->IOFileExists(path)) { Kernel::CLI->Debug.Error("Unable to locate file %s", filename); }
+                    else 
+                    { 
+                        VFS::FileEntry* file = Kernel::FileSys->GetFileByName(path);
+
+                        Kernel::CLI->Debug.WriteLine("NAME            %s", file->Name);
+                        Kernel::CLI->Debug.WriteLine("PARENT          %d", file->ParentIndex);
+                        Kernel::CLI->Debug.WriteLine("STATUS          %d", file->Status);
+                        Kernel::CLI->Debug.WriteLine("TYPE            %d", file->Type);
+
+                        if (file->Type == VFS::EntryType::File)
+                        {
+                            Kernel::CLI->Debug.WriteLine("START SECTOR    %d", file->StartSector);   
+                            Kernel::CLI->Debug.WriteLine("SECTOR COUNT    %d", file->SectorCount);   
+                            Kernel::CLI->Debug.WriteLine("SIZE            %d", file->Size); 
+                        }
+                    }
+                    Kernel::MemoryMgr.Free(path);
+                }
+
+                Kernel::MemoryMgr.Free(filename);
+            }
+        }
+
+        #pragma endregion
     }
 }

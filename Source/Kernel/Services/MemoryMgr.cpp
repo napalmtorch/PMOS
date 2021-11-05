@@ -435,6 +435,17 @@ namespace PMOS
         
         uint MemoryManager::GetHeapCount() { return Header.TableEntries; }
 
+        uint MemoryManager::GetUsedHeapCount() 
+        { 
+            Header.TableEntriesUsed = 0;
+            for (uint i = 0; i < Header.TableMaxEntries; i++)
+            {
+                HeapEntry* entry = GetEntry(i);
+                if (IsAddressValid(entry->Base) && entry->Type != (byte)AllocationType::Unused) { Header.TableEntriesUsed++; }
+            }
+            return Header.TableEntriesUsed;
+        }
+
         uint MemoryManager::GetRAMInstalled()
         {
             register ulong* mem;

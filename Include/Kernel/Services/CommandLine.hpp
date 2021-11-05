@@ -72,26 +72,36 @@ namespace PMOS
 
     namespace CommandMethods
     {
+        // general
         void CLS(char* input, Array<char**> args);
         void HELP(char* input, Array<char**> args);
         void ECHO(char* input, Array<char**> args);
-        void HEAP(char* input, Array<char**> args);
-        void SERVICES(char* input, Array<char**> args);
-        void THREADS(char* input, Array<char**> args);
-        void MMAP(char* input, Array<char**> args);
-        void ENDLESS(char* input, Array<char**> args);
         void TIME(char* input, Array<char**> args);
+        void ENDLESS(char* input, Array<char**> args);
+        void XSERVER(char* input, Array<char**> args);
+        void RUN(char* input, Array<char**> args);
+
+        // info/stats
         void INFO(char* input, Array<char**> args);
         void SYSINFO(char* input, Array<char**> args);
         void MEM(char* input, Array<char**> args);
         void PERF(char* input, Array<char**> args);
         void LSPCI(char* input, Array<char**> args);
-        void CD(char* input, Array<char**> args);
-        void DIR(char* input, Array<char**> args);
-        void XSERVER(char* input, Array<char**> args);
+        void HEAP(char* input, Array<char**> args);
+        void SERVICES(char* input, Array<char**> args);
+        void THREADS(char* input, Array<char**> args);
+        void MMAP(char* input, Array<char**> args);
         void VESAMODES(char* input, Array<char**> args);
-        void RUN(char* input, Array<char**> args);
+
+        // debugging
         void DUMP(char* input, Array<char**> args);
         void PANIC(char* input, Array<char**> args);
+
+        // file system
+        void CD(char* input, Array<char**> args);
+        void DIR(char* input, Array<char**> args);
+        void MKDIR(char* input, Array<char**> args);
+        void FVIEW(char* input, Array<char**> args);
+        void FSINFO(char* input, Array<char**> args);
     }
 }

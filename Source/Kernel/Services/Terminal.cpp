@@ -90,7 +90,7 @@ namespace PMOS
                     CursorY--;
                     Kernel::VGA->DrawChar(CursorX, CursorY, 0x20, (byte)ForeColor, (byte)BackColor);
                 }
-                Kernel::Terminal->UpdateCursor();
+                UpdateCursor();
                 return;
             }
 
@@ -105,6 +105,7 @@ namespace PMOS
                 CursorY--;
                 Canvas.DrawChar(CursorX * 8, CursorY * 16, 0x20,  Canvas.ConvertColor(ForeColor), Canvas.ConvertColor(BackColor), Fonts::Serif8x16);
             }
+            UpdateCursor();
         }
 
         void TextModeTerminal::Scroll()
@@ -193,7 +194,7 @@ namespace PMOS
         
         void TextModeTerminal::UpdateCursor() 
         { 
-            if (Legacy) { Kernel::VGA->SetCursorPos(CursorX, CursorY); return; }
+            if (Legacy) { Kernel::VGA->SetCursorPos(CursorX, CursorY); }
         }
         
         void TextModeTerminal::SetCursorPos(int x, int y, bool update)

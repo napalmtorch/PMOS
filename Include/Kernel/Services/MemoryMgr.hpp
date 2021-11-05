@@ -46,6 +46,7 @@ namespace PMOS
         uint TableLength;
         uint TablePosition;
         uint TableEntries;
+        uint TableEntriesUsed;
         uint TableMaxEntries;
         uint DataStart;
         uint DataEnd;
@@ -96,6 +97,7 @@ namespace PMOS
                 HeapEntry* GetEntryFromPtr(void* ptr);
                 uint       GetSizeFromPtr(void* ptr);
                 uint       GetHeapCount();
+                uint       GetUsedHeapCount();
                 uint       GetRAMInstalled();
                 uint       GetRAMReserved();
                 uint       GetRAMFree();
