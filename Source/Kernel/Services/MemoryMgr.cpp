@@ -99,13 +99,13 @@ namespace PMOS
                     Kernel::Terminal->SetForeColor(Col4::Yellow);
 
                     char sizemsg[8];
-                    String::Clear(sizemsg);
+                    StringUtil::Clear(sizemsg);
                     uint size = 0;
 
-                    if (entry->Size < 1024) { String::Copy(sizemsg, "BYTES"); size = entry->Size; }
-                    if (entry->Size >= 1024 && entry->Size < 1024 * 1024) { String::Copy(sizemsg, "KB    "); size = entry->Size / 1024; }
-                    else if (entry->Size >= 1024 * 1024 && entry->Size < 1024 * 1024 * 1024) { String::Copy(sizemsg, "MB    "); size = entry->Size / 1024 / 1024; }
-                    else if (entry->Size >= 1024 * 1024 * 1024) { String::Copy(sizemsg, "GB    "); size = entry->Size / 1024 / 1024 / 1024; }
+                    if (entry->Size < 1024) { StringUtil::Copy(sizemsg, "BYTES"); size = entry->Size; }
+                    if (entry->Size >= 1024 && entry->Size < 1024 * 1024) { StringUtil::Copy(sizemsg, "KB    "); size = entry->Size / 1024; }
+                    else if (entry->Size >= 1024 * 1024 && entry->Size < 1024 * 1024 * 1024) { StringUtil::Copy(sizemsg, "MB    "); size = entry->Size / 1024 / 1024; }
+                    else if (entry->Size >= 1024 * 1024 * 1024) { StringUtil::Copy(sizemsg, "GB    "); size = entry->Size / 1024 / 1024 / 1024; }
 
                     Kernel::Debug.Write("%d ", size);
                     Kernel::Terminal->SetForeColor(old);
@@ -141,13 +141,13 @@ namespace PMOS
                 Kernel::Terminal->SetForeColor(Col4::Yellow);
 
                 char sizemsg[8];
-                String::Clear(sizemsg);
+                StringUtil::Clear(sizemsg);
                 uint size = 0;
 
-                if (entry->LengthLow < 1024) { String::Copy(sizemsg, "BYTES"); size = entry->LengthLow; }
-                if (entry->LengthLow >= 1024 && entry->LengthLow < 1024 * 1024) { String::Copy(sizemsg, "KB    "); size = entry->LengthLow / 1024; }
-                else if (entry->LengthLow >= 1024 * 1024 && entry->LengthLow < 1024 * 1024 * 1024) { String::Copy(sizemsg, "MB    "); size = entry->LengthLow / 1024 / 1024; }
-                else if (entry->LengthLow >= 1024 * 1024 * 1024) { String::Copy(sizemsg, "GB    "); size = entry->LengthLow / 1024 / 1024 / 1024; }
+                if (entry->LengthLow < 1024) { StringUtil::Copy(sizemsg, "BYTES"); size = entry->LengthLow; }
+                if (entry->LengthLow >= 1024 && entry->LengthLow < 1024 * 1024) { StringUtil::Copy(sizemsg, "KB    "); size = entry->LengthLow / 1024; }
+                else if (entry->LengthLow >= 1024 * 1024 && entry->LengthLow < 1024 * 1024 * 1024) { StringUtil::Copy(sizemsg, "MB    "); size = entry->LengthLow / 1024 / 1024; }
+                else if (entry->LengthLow >= 1024 * 1024 * 1024) { StringUtil::Copy(sizemsg, "GB    "); size = entry->LengthLow / 1024 / 1024 / 1024; }
 
                 Kernel::Debug.Write("%d", size);
                 Kernel::Terminal->SetForeColor(old);
@@ -235,6 +235,7 @@ namespace PMOS
                 if (temp->Base == (uint)ptr)
                 {
                     if (MessagesEnabled) { PrintFree(temp); }
+                    if (i == 0) { Kernel::Debug.Panic("Heap corruption"); return; }
                     Header.DataUsed -= temp->Length;
                     Memory::Set((void*)temp->Base, 0, temp->Length);
                     temp->Type = (byte)AllocationType::Unused;

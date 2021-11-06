@@ -7,7 +7,7 @@ namespace PMOS
     {
         void ServiceManager::Initialize()
         {
-            Services = (Service**)Kernel::MemoryMgr.Allocate(sizeof(Service*) * MaxCount, true, AllocationType::System);
+            Services = (Service**)MemAlloc(sizeof(Service*) * MaxCount, true, AllocationType::System);
             Count = 0;
         }
 
@@ -50,11 +50,11 @@ namespace PMOS
         void ServiceManager::Start(char* name)
         {
             if (name == nullptr) { return; }
-            if (String::Length(name) == 0) { return; }
+            if (StringUtil::Length(name) == 0) { return; }
             for (size_t i = 0; i < MaxCount; i++)
             {
                 if (Services[i] == nullptr) { continue; }
-                if (String::Equals(Services[i]->GetName(), name)) 
+                if (StringUtil::Equals(Services[i]->GetName(), name)) 
                 { 
                     Services[i]->Start(); 
                     Kernel::Debug.Info("Started service '%s'", Services[i]->GetName());
@@ -79,11 +79,11 @@ namespace PMOS
         void ServiceManager::Stop(char* name)
         {
             if (name == nullptr) { return; }
-            if (String::Length(name) == 0) { return; }
+            if (StringUtil::Length(name) == 0) { return; }
             for (size_t i = 0; i < MaxCount; i++)
             {
                 if (Services[i] == nullptr) { continue; }
-                if (String::Equals(Services[i]->GetName(), name)) 
+                if (StringUtil::Equals(Services[i]->GetName(), name)) 
                 { 
                     if (Services[i]->GetType() == ServiceType::KernelComponent) { Kernel::Debug.Error("Cannot terminate kernel component"); return; }
                     Services[i]->Stop(); 
@@ -133,11 +133,11 @@ namespace PMOS
         Service* ServiceManager::Get(char* name)
         {
             if (name == nullptr) { return nullptr; }
-            if (String::Length(name) == 0) { return nullptr; }
+            if (StringUtil::Length(name) == 0) { return nullptr; }
             for (size_t i = 0; i < MaxCount; i++)
             {
                 if (Services[i] == nullptr) { continue; }
-                if (String::Equals(Services[i]->GetName(), name)) 
+                if (StringUtil::Equals(Services[i]->GetName(), name)) 
                 { 
                     return Services[i];
                 }

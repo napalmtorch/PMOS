@@ -47,7 +47,7 @@ namespace PMOS
             {
                 Service::Stop();
 
-                Kernel::MemoryMgr.Free(Buffer);
+                MemFree(Buffer);
             }
 
             void VESAController::Display()
@@ -126,7 +126,7 @@ namespace PMOS
                 if (!Started) { return false; }
                 
                 // delete old buffer
-                if (Buffer != nullptr) { Kernel::MemoryMgr.Free(Buffer); Buffer = nullptr; }
+                if (Buffer != nullptr) { MemFree(Buffer); Buffer = nullptr; }
 
                 // populate info block
                 PopulateInfoBlock();
@@ -154,7 +154,7 @@ namespace PMOS
                         mode = modes[i];
                         
                         size_t size = (info->Height * info->Pitch);
-                        Buffer = Kernel::MemoryMgr.Allocate(size * 4, true, AllocationType::FrameBuffer);
+                        Buffer = MemAlloc(size * 4, true, AllocationType::FrameBuffer);
 
                         CurrentMode.Width  = info->Width;
                         CurrentMode.Height = info->Height;

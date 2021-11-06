@@ -22,7 +22,7 @@ namespace PMOS
             MaxCount = 256;
 
             // create thread list
-            Threads = (Thread**)Kernel::MemoryMgr.Allocate(MaxCount * sizeof(Thread*), true, AllocationType::System);
+            Threads = (Thread**)MemAlloc(MaxCount * sizeof(Thread*), true, AllocationType::System);
 
             // reset other properties
             CurrentThread = nullptr;
@@ -179,13 +179,13 @@ namespace PMOS
         {
             // validate name
             if (name == nullptr) { return false; }
-            if (String::Length(name) == 0) { return false; }
+            if (StringUtil::Length(name) == 0) { return false; }
 
             // loop through list
             for (uint i = 0; i < MaxCount; i++)
             {
                 // located thread - terminate and return success
-                if (Threads[i] != nullptr && String::Equals(Threads[i]->Properties.Name, name))
+                if (Threads[i] != nullptr && StringUtil::Equals(Threads[i]->Properties.Name, name))
                 {
                     Threads[i]->Stop();
                     return true;
@@ -201,7 +201,7 @@ namespace PMOS
         {
             // validate name
             if (name == nullptr) { return false; }
-            if (String::Length(name) == 0) { return false; }
+            if (StringUtil::Length(name) == 0) { return false; }
 
             Kernel::InterruptMgr.DisableInterrupts();
 
@@ -210,7 +210,7 @@ namespace PMOS
             for (uint i = 0; i < MaxCount; i++)
             {
                 // located thread - terminate and continue to next
-                if (Threads[i] != nullptr && String::Equals(Threads[i]->Properties.Name, name))
+                if (Threads[i] != nullptr && StringUtil::Equals(Threads[i]->Properties.Name, name))
                 {
                     Threads[i]->Stop();
                     del++;

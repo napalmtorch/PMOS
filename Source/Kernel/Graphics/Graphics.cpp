@@ -54,7 +54,7 @@ namespace PMOS
         {
             if (text == nullptr) { return; }
             int dx = x, dy = y;
-            for (size_t i = 0; i < String::Length(text); i++)
+            for (size_t i = 0; i < StringUtil::Length(text); i++)
             {
                 if (text[i] == '\n') { dx = x; dy += font.Height + font.SpacingY; }
                 else if (text[i] >= 32 && text[i] <= 126)
@@ -69,7 +69,7 @@ namespace PMOS
         {
             if (text == nullptr) { return; }
             int dx = x, dy = y;
-            for (size_t i = 0; i < String::Length(text); i++)
+            for (size_t i = 0; i < StringUtil::Length(text); i++)
             {
                 if (text[i] == '\n') { dx = x; dy += font.Height + font.SpacingY; }
                 else if (text[i] >= 32 && text[i] <= 126)
@@ -109,7 +109,7 @@ namespace PMOS
         void VESACanvas::Initialize()
         {
             BufferSize = Kernel::VESA->GetWidth() * Kernel::VESA->GetHeight() * 4;
-            Buffer = (byte*)Kernel::MemoryMgr.Allocate(BufferSize, true, AllocationType::FrameBuffer);
+            Buffer = (byte*)MemAlloc(BufferSize, true, AllocationType::FrameBuffer);
         }
 
         void VESACanvas::Clear(Col32 color)
@@ -286,7 +286,7 @@ namespace PMOS
         {
             if (text == nullptr) { return; }
             int dx = x, dy = y;
-            for (size_t i = 0; i < String::Length(text); i++)
+            for (size_t i = 0; i < StringUtil::Length(text); i++)
             {
                 if (text[i] == '\n') { dx = x; dy += font.Height + font.SpacingY; }
                 else if (text[i] >= 32 && text[i] <= 126)
@@ -301,7 +301,7 @@ namespace PMOS
         {
             if (text == nullptr) { return; }
             int dx = x, dy = y;
-            for (size_t i = 0; i < String::Length(text); i++)
+            for (size_t i = 0; i < StringUtil::Length(text); i++)
             {
                 if (text[i] == '\n') { dx = x; dy += font.Height + font.SpacingY; }
                 else if (text[i] >= 32 && text[i] <= 126)
@@ -316,7 +316,7 @@ namespace PMOS
         {
             if (text == nullptr) { return; }
             int dx = x, dy = y;
-            for (size_t i = 0; i < String::Length(text); i++)
+            for (size_t i = 0; i < StringUtil::Length(text); i++)
             {
                 if (text[i] == '\n') { dx = x; dy += font.Height + font.SpacingY; }
                 else if (text[i] >= 32 && text[i] <= 126)
@@ -331,7 +331,7 @@ namespace PMOS
         {
             if (text == nullptr) { return; }
             int dx = x, dy = y;
-            for (size_t i = 0; i < String::Length(text); i++)
+            for (size_t i = 0; i < StringUtil::Length(text); i++)
             {
                 if (text[i] == '\n') { dx = x; dy += font.Height + font.SpacingY; }
                 else if (text[i] >= 32 && text[i] <= 126)
@@ -645,7 +645,7 @@ namespace PMOS
         {
             if (text == nullptr) { return; }
             int dx = x, dy = y;
-            for (size_t i = 0; i < String::Length(text); i++)
+            for (size_t i = 0; i < StringUtil::Length(text); i++)
             {
                 if (text[i] == '\n') { dx = x; dy += font.Height + font.SpacingY; }
                 else if (text[i] >= 32 && text[i] <= 126)
@@ -660,7 +660,7 @@ namespace PMOS
         {
             if (text == nullptr) { return; }
             int dx = x, dy = y;
-            for (size_t i = 0; i < String::Length(text); i++)
+            for (size_t i = 0; i < StringUtil::Length(text); i++)
             {
                 if (text[i] == '\n') { dx = x; dy += font.Height + font.SpacingY; }
                 else if (text[i] >= 32 && text[i] <= 126)
@@ -673,10 +673,9 @@ namespace PMOS
 
         void BitmapCanvas::DrawString(int x, int y, char* text, uint fg, Font font)
         {
-            Kernel::Debug.WriteLine("DRAWING CHAR: X = %d, Y = %d, text = %s, fg = %8x, font = %8x", x, y, text, fg, (Font*)&font);
             if (text == nullptr) { return; }
             int dx = x, dy = y;
-            for (size_t i = 0; i < String::Length(text); i++)
+            for (size_t i = 0; i < StringUtil::Length(text); i++)
             {
                 if (text[i] == '\n') { dx = x; dy += font.Height + font.SpacingY; }
                 else if (text[i] >= 32 && text[i] <= 126)
@@ -691,7 +690,7 @@ namespace PMOS
         {
             if (text == nullptr) { return; }
             int dx = x, dy = y;
-            for (size_t i = 0; i < String::Length(text); i++)
+            for (size_t i = 0; i < StringUtil::Length(text); i++)
             {
                 if (text[i] == '\n') { dx = x; dy += font.Height + font.SpacingY; }
                 else if (text[i] >= 32 && text[i] <= 126)

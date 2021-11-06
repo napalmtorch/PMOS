@@ -92,3 +92,204 @@ template<typename T> class Array
         }
 };
 
+/*
+// i will work on string class
+// start implementing here - idk how you prefer it to be named lol ok xD
+template<class K, class V> class Map
+{
+private:
+    K* keys = nullptr;
+    V* values = nullptr;
+
+    size_t count = 0;
+public:
+    Map() {}
+
+    // get value by key
+    V& Get(K name)
+    {
+        // dummy variable, just to return
+        V dummy;
+
+        // check if keys/values are not null
+        if (keys == nullptr || values == nullptr) return dummy;
+
+        // kernel panic is a good sign right ig xD
+
+        // loop through keys
+        for (int i = 0; i < count; i++)
+        {
+            // if key is found
+            if (name == keys[i])
+            {
+                // return value
+                return values[i];
+            }
+        }
+
+        // return dummy
+        return dummy;
+    }
+
+    // add new key/value pair
+    void Set(K name, V value)
+    {
+        // check if keys/values are not null
+        if (keys == nullptr || values == nullptr)
+        {
+            // allocate memory for keys/values
+            keys = new K[1];
+            values = new V[1];
+
+            // set key/value
+            keys[0] = name;
+            values[0] = value;
+
+            // increase count
+            count++;
+        }
+        else
+        {
+            // allocate memory for new keys/values
+            K* newKeys = new K[count + 1];
+            V* newValues = new V[count + 1];
+
+            // loop through keys
+            for (int i = 0; i < count; i++)
+            {
+                // set new keys/values
+                newKeys[i] = keys[i];
+                newValues[i] = values[i];
+            }
+
+            // set new key/value
+            newKeys[count] = name;
+            newValues[count] = value;
+
+            // delete old keys/values
+            delete keys;
+            delete values;
+
+            // set new keys/values
+            keys = newKeys;
+            values = newValues;
+
+            // increase count
+            count++;
+        }
+    }
+
+    // remove key/value pair
+    void Remove(K name)
+    {
+        // check if keys/values are not null
+        if (keys == nullptr || values == nullptr) return;
+
+        // loop through keys
+        for (int i = 0; i < count; i++)
+        {
+            // if key is found
+            if (name == keys[i])
+            {
+                // remove key/value
+                V* newValues = new V[count - 1];
+                K* newKeys = new K[count - 1];
+
+                // loop through keys
+                for (int j = 0; j < count; j++)
+                {
+                    // if key is found
+                    if (j == i)
+                    {
+                        // skip
+                        continue;
+                    }
+                    else
+                    {
+                        // set new keys/values
+                        newKeys[j] = keys[j];
+                        newValues[j] = values[j];
+                    }
+                }
+
+                // decrease count
+                count--;
+
+                // break loop
+                break;
+            }
+        }
+    }
+
+    // remove all keys/values
+    void Clear()
+    {
+        // delete keys/values
+        delete keys;
+        delete values;
+
+        // set keys/values to null
+        keys = nullptr;
+        values = nullptr;
+
+        // set count to 0
+        count = 0;
+    }
+
+    // check if key exists
+    bool Contains(K name)
+    {
+        // check if keys/values are not null
+        if (keys == nullptr || values == nullptr) return false;
+
+        // loop through keys
+        for (int i = 0; i < count; i++)
+        {
+            // if key is found
+            if (name == keys[i])
+            {
+                // return true
+                return true;
+            }
+        }
+
+        // return false
+        return false;
+    }
+
+    // get count
+    size_t Count()
+    {
+        return count;
+    }
+
+    // get keys
+    K* Keys()
+    {
+        return keys;
+    }
+
+    // get values
+    V* Values()
+    {
+        return values;
+    }
+
+    // override []
+    V &operator[](K name)
+    {
+        // check if the key exists
+        if (!Contains(name))
+        {
+            // add key/value pair
+            Set(name, V());
+        }
+
+        // return value
+        return Get(name);
+    }
+};
+
+// fixed it lmao
+// yes wait no its cuz you were still typing a few seconds ago when I ran it
+*/

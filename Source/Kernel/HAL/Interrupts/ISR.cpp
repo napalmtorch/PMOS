@@ -130,8 +130,8 @@ extc
         if (r->Interrupt  < 0 || r->Interrupt >= 32) 
         { 
             char str[128];
-            PMOS::String::FromHex(r->Interrupt, str, true, 4);
-            PMOS::String::Append(str, " : Unknown exception");
+            PMOS::StringUtil::FromHex(r->Interrupt, str, true, 4);
+            PMOS::StringUtil::Append(str, " : Unknown exception");
             PMOS::Kernel::Debug.Panic(str, r);
         }
         else { PMOS::Kernel::Debug.Panic((char*)ExceptionMessages[r->Interrupt], r); }

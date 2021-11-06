@@ -25,14 +25,14 @@ namespace PMOS
             Terminated = false;
 
 
-            Commands = (Command**)Kernel::MemoryMgr.Allocate(MaxCommandCount * sizeof(Command*), true, AllocationType::System);
+            Commands = (Command**)MemAlloc(MaxCommandCount * sizeof(Command*), true, AllocationType::System);
             Count = 0;
 
-            CommandBuffer = (char**)Kernel::MemoryMgr.Allocate(MaxBufferCount * sizeof(char*), true, AllocationType::System);
+            CommandBuffer = (char**)MemAlloc(MaxBufferCount * sizeof(char*), true, AllocationType::System);
             BufferPos = 0;
 
-            CurrentPath = (char*)Kernel::MemoryMgr.Allocate(512, true, AllocationType::String);
-            String::Append(CurrentPath, "/");
+            CurrentPath = (char*)MemAlloc(512, true, AllocationType::String);
+            StringUtil::Append(CurrentPath, "/");
 
             RegisterCommand(Command("CLS", "Clear the screen", "cls", CommandMethods::CLS));
             RegisterCommand(Command("HELP", "Show list of commands", "help", CommandMethods::HELP));
@@ -58,7 +58,7 @@ namespace PMOS
             RegisterCommand(Command("DUMP", "Dump memory at specified address", "dump [addr] [size]", CommandMethods::DUMP));
             RegisterCommand(Command("PANIC", "Force a kernel level exception", "panic", CommandMethods::PANIC));
 
-            KBData = (byte*)Kernel::MemoryMgr.Allocate(512, true, AllocationType::String);
+            KBData = (byte*)MemAlloc(512, true, AllocationType::String);
             KBStream = Stream(KBData, 512);
             Kernel::Keyboard->SetStream(&KBStream);
             Kernel::Keyboard->TerminalOutput = true;
@@ -73,18 +73,18 @@ namespace PMOS
 
             if (Commands != nullptr) 
             { 
-                for (uint i = 0; i < MaxCommandCount; i++) { if (Commands[i] != nullptr) { Kernel::MemoryMgr.Free(Commands[i]); } }
-                Kernel::MemoryMgr.Free(Commands); 
+                for (uint i = 0; i < MaxCommandCount; i++) { if (Commands[i] != nullptr) { MemFree(Commands[i]); } }
+                MemFree(Commands); 
             }
 
             if (CommandBuffer != nullptr)
             {
-                for (uint i = 0; i < MaxBufferCount; i++) { if (CommandBuffer[i] != nullptr) { Kernel::MemoryMgr.Free(CommandBuffer[i]); } }
+                for (uint i = 0; i < MaxBufferCount; i++) { if (CommandBuffer[i] != nullptr) { MemFree(CommandBuffer[i]); } }
             }
 
-            if (CurrentPath != nullptr) { Kernel::MemoryMgr.Free(CurrentPath); }
+            if (CurrentPath != nullptr) { MemFree(CurrentPath); }
 
-            Kernel::MemoryMgr.Free(KBData);
+            MemFree(KBData);
         }
 
         void CommandLine::PrintCaret()
@@ -107,7 +107,7 @@ namespace PMOS
             int i = GetFreeIndex();
             if (i < 0 || i >= MaxCommandCount) { Kernel::Debug.Error("Maximum amount of register commands has been reached"); return; }
 
-            Command* new_cmd = (Command*)Kernel::MemoryMgr.Allocate(sizeof(Command), true, AllocationType::System);
+            Command* new_cmd = (Command*)MemAlloc(sizeof(Command), true, AllocationType::System);
             new_cmd->Name = cmd.Name;
             new_cmd->Help = cmd.Help;
             new_cmd->Usage = cmd.Usage;
@@ -120,8 +120,8 @@ namespace PMOS
         void CommandLine::PushCommand(char* input)
         {
             if (BufferPos < 0 || BufferPos >= MaxBufferCount) { Debug.Error("Command buffer overflow exception"); return; }
-            int len = String::Length(input) + 1;
-            char* cmd = (char*)Kernel::MemoryMgr.Allocate(len, true, AllocationType::String);
+            int len = StringUtil::Length(input) + 1;
+            char* cmd = (char*)MemAlloc(len, true, AllocationType::String);
             Memory::Copy(cmd, input, len);
             CommandBuffer[BufferPos] = cmd;
             BufferPos++;
@@ -139,7 +139,7 @@ namespace PMOS
             {
                 if (CommandBuffer[i] != nullptr) 
                 { 
-                    Kernel::MemoryMgr.Free(CommandBuffer[i]); 
+                    MemFree(CommandBuffer[i]); 
                     CommandBuffer[i] = nullptr;
                 }
             }
@@ -155,29 +155,29 @@ namespace PMOS
             while (pos < count)
             {
                 char* input = CommandBuffer[pos];
-                if (String::Length(input) == 0) { PopCommand(); pos++; continue; }
+                if (StringUtil::Length(input) == 0) { PopCommand(); pos++; continue; }
 
                 if (CommandArgs != nullptr)
                 {
-                    for (size_t i = 0; i < CommandArgsCount; i++) { Kernel::MemoryMgr.Free(CommandArgs[i]); }
-                    Kernel::MemoryMgr.Free(CommandArgs);
+                    for (size_t i = 0; i < CommandArgsCount; i++) { MemFree(CommandArgs[i]); }
+                    MemFree(CommandArgs);
                 }
-                CommandArgs = String::Split(input, ' ', &CommandArgsCount);
+                CommandArgs = StringUtil::Split(input, ' ', &CommandArgsCount);
                 if (CommandArgsCount == 0) { PopCommand(); pos++; continue; }
 
-                char* cmd = (char*)Kernel::MemoryMgr.Allocate(String::Length(CommandArgs[0]), true, AllocationType::String);
-                String::Copy(cmd, CommandArgs[0]);
-                String::ToUpper(cmd);
+                char* cmd = (char*)MemAlloc(StringUtil::Length(CommandArgs[0]), true, AllocationType::String);
+                StringUtil::Copy(cmd, CommandArgs[0]);
+                StringUtil::ToUpper(cmd);
 
                 bool exec = false;
                 for (size_t i = 0; i < MaxCommandCount; i++)
                 {
                     if (Commands[i]->Execute == nullptr) { continue; }
-                    if (String::Equals(Commands[i]->Name, cmd))
+                    if (StringUtil::Equals(Commands[i]->Name, cmd))
                     {
                         Array<char**> arr = Array<char**>(CommandArgs, CommandArgsCount);
                         Commands[i]->Execute(input, arr);
-                        Kernel::MemoryMgr.Free(cmd);
+                        MemFree(cmd);
                         exec = true;
                         pos++;
                         PopCommand();
@@ -189,7 +189,7 @@ namespace PMOS
                 pos++;
                 PopCommand();
                 Debug.Error("Invalid command");
-                Kernel::MemoryMgr.Free(cmd);
+                MemFree(cmd);
             }
 
             FreeCommands();    
@@ -218,19 +218,19 @@ namespace PMOS
             // path is a full path
             if (path[0] == '/')
             {
-                char* output = (char*)Kernel::MemoryMgr.Allocate(String::Length(path), true, AllocationType::String);
-                String::Copy(output, path);
-                if (output[String::Length(output) - 1] == ' ') { String::Delete(output); }
+                char* output = (char*)MemAlloc(StringUtil::Length(path), true, AllocationType::String);
+                StringUtil::Copy(output, path);
+                if (output[StringUtil::Length(output) - 1] == ' ') { StringUtil::Delete(output); }
                 return output;
             }
             // path is a relative path
             else
             {
-                char* full_path = (char*)Kernel::MemoryMgr.Allocate(2048, true, AllocationType::String);
-                String::Append(full_path, CurrentPath);
-                if (full_path[String::Length(full_path) - 1] != '/') { String::Append(full_path, '/'); }
-                String::Append(full_path, path);
-                String::Append(full_path, '\0');
+                char* full_path = (char*)MemAlloc(2048, true, AllocationType::String);
+                StringUtil::Append(full_path, CurrentPath);
+                if (full_path[StringUtil::Length(full_path) - 1] != '/') { StringUtil::Append(full_path, '/'); }
+                StringUtil::Append(full_path, path);
+                StringUtil::Append(full_path, '\0');
                 return full_path;
             }
         }
@@ -270,7 +270,7 @@ namespace PMOS
 
         void ECHO(char* input, Array<char**> args)
         {
-            if (String::Length(input) < 6) { Kernel::CLI->Debug.Error("Expected string value"); return; }
+            if (StringUtil::Length(input) < 6) { Kernel::CLI->Debug.Error("Expected string value"); return; }
             char* msg = (char*)(input + 5);
             Kernel::Terminal->WriteLine(msg);
         }
@@ -355,8 +355,8 @@ namespace PMOS
 
         void XSERVER(char* input, Array<char**> args)
         {
-            if (Kernel::XServer != nullptr) { Kernel::MemoryMgr.Free(Kernel::XServer); }
-            if (Kernel::WinMgr != nullptr) { Kernel::MemoryMgr.Free(Kernel::WinMgr); }
+            if (Kernel::XServer != nullptr) { MemFree(Kernel::XServer); }
+            if (Kernel::WinMgr != nullptr) { MemFree(Kernel::WinMgr); }
 
             Kernel::WinMgr = new UI::WindowManager();
             Kernel::WinMgr->Initialize();
@@ -422,8 +422,8 @@ namespace PMOS
             char* addr_str = args.Data[1];
             char* size_str = args.Data[2];
 
-            uint addr = String::ToHex(addr_str);
-            uint size = String::ToDecimal(size_str);
+            uint addr = StringUtil::ToHex(addr_str);
+            uint size = StringUtil::ToDecimal(size_str);
             
             Kernel::CLI->Debug.DumpMemory((void*)addr, size);
         }
@@ -437,62 +437,62 @@ namespace PMOS
 
         void CD(char* input, Array<char**> args)
         {
-            char* dirname = (char*)Kernel::MemoryMgr.Allocate(String::Length(input), true, AllocationType::String);
-            dirname = String::Copy(dirname, (char*)(input + 3));
+            char* dirname = (char*)MemAlloc(StringUtil::Length(input), true, AllocationType::String);
+            dirname = StringUtil::Copy(dirname, (char*)(input + 3));
             if (dirname == nullptr) { return; }
-            if (String::Length(dirname) == 0) { Kernel::MemoryMgr.Free(dirname); return; }
-            if (dirname[String::Length(dirname) - 1] == 0x20) { String::Delete(dirname); }
+            if (StringUtil::Length(dirname) == 0) { MemFree(dirname); return; }
+            if (dirname[StringUtil::Length(dirname) - 1] == 0x20) { StringUtil::Delete(dirname); }
 
             // input directory is root
-            if (String::Equals(dirname, "/")) 
+            if (StringUtil::Equals(dirname, "/")) 
             { 
-                Kernel::MemoryMgr.Free(Kernel::CLI->CurrentPath); 
-                Kernel::CLI->CurrentPath = (char*)Kernel::MemoryMgr.Allocate(4, true, AllocationType::String);
-                String::Append(Kernel::CLI->CurrentPath, "/\0");
-                Kernel::MemoryMgr.Free(dirname);
+                MemFree(Kernel::CLI->CurrentPath); 
+                Kernel::CLI->CurrentPath = (char*)MemAlloc(4, true, AllocationType::String);
+                StringUtil::Append(Kernel::CLI->CurrentPath, "/\0");
+                MemFree(dirname);
             }
             // input directory is a full path
             else if (dirname[0] == '/')
             {
-                if (!Kernel::FileSys->IODirectoryExists(dirname)) { Kernel::CLI->Debug.Error("Unable to locate directory %s\n", dirname); Kernel::MemoryMgr.Free(dirname); return; }
-                Kernel::MemoryMgr.Free(Kernel::CLI->CurrentPath);
+                if (!Kernel::FileSys->IODirectoryExists(dirname)) { Kernel::CLI->Debug.Error("Unable to locate directory %s\n", dirname); MemFree(dirname); return; }
+                MemFree(Kernel::CLI->CurrentPath);
                 Kernel::CLI->CurrentPath = dirname;
             }
             // input directory is a relative path
             else
             {
-                char* full_path = (char*)Kernel::MemoryMgr.Allocate(String::Length(dirname) + String::Length(Kernel::CLI->CurrentPath) + 8, true, AllocationType::String);
-                String::Append(full_path, Kernel::CLI->CurrentPath);
-                if (full_path[String::Length(full_path) - 1] != '/') { String::Append(full_path, '/'); }
-                String::Append(full_path, dirname);
-                String::Append(full_path, '\0');
-                if (!Kernel::FileSys->IODirectoryExists(full_path)) { Kernel::CLI->Debug.Error("Unable to locate directory %s\n", dirname); Kernel::MemoryMgr.Free(dirname); Kernel::MemoryMgr.Free(full_path); return; }
-                Kernel::MemoryMgr.Free(Kernel::CLI->CurrentPath);
+                char* full_path = (char*)MemAlloc(StringUtil::Length(dirname) + StringUtil::Length(Kernel::CLI->CurrentPath) + 8, true, AllocationType::String);
+                StringUtil::Append(full_path, Kernel::CLI->CurrentPath);
+                if (full_path[StringUtil::Length(full_path) - 1] != '/') { StringUtil::Append(full_path, '/'); }
+                StringUtil::Append(full_path, dirname);
+                StringUtil::Append(full_path, '\0');
+                if (!Kernel::FileSys->IODirectoryExists(full_path)) { Kernel::CLI->Debug.Error("Unable to locate directory %s\n", dirname); MemFree(dirname); MemFree(full_path); return; }
+                MemFree(Kernel::CLI->CurrentPath);
                 Kernel::CLI->CurrentPath = full_path;
-                Kernel::MemoryMgr.Free(dirname);
+                MemFree(dirname);
             }
         }
 
         void DIR(char* input, Array<char**> args)
         {
             // no path provided
-            if (String::Length(input) < 5) { Kernel::FileSys->PrintDirectoryContents(Kernel::CLI->CurrentPath); return; }
+            if (StringUtil::Length(input) < 5) { Kernel::FileSys->PrintDirectoryContents(Kernel::CLI->CurrentPath); return; }
 
-            char* dirname = (char*)Kernel::MemoryMgr.Allocate(String::Length(input), true, AllocationType::String);
-            dirname = String::Copy(dirname, (char*)(input + 4));
-            if (dirname[String::Length(dirname) - 1] == 0x20) { String::Delete(dirname); }
+            char* dirname = (char*)MemAlloc(StringUtil::Length(input), true, AllocationType::String);
+            dirname = StringUtil::Copy(dirname, (char*)(input + 4));
+            if (dirname[StringUtil::Length(dirname) - 1] == 0x20) { StringUtil::Delete(dirname); }
 
             if (dirname != nullptr)
             {
-                if (String::Length(dirname) > 0)
+                if (StringUtil::Length(dirname) > 0)
                 {
                     char* path = Kernel::CLI->PathToCLIPath(dirname);
                     if (!Kernel::FileSys->IODirectoryExists(path)) { Kernel::CLI->Debug.Error("Unable to locate directory %s", dirname); }
                     else { Kernel::FileSys->PrintDirectoryContents(path); }
-                    Kernel::MemoryMgr.Free(path);
+                    MemFree(path);
                 }
 
-                Kernel::MemoryMgr.Free(dirname);
+                MemFree(dirname);
             }
         }
 
@@ -505,13 +505,13 @@ namespace PMOS
         {
             if (args.Count < 2) { Kernel::CLI->Debug.Error("Please specify a file"); return; }
            
-            char* filename = (char*)Kernel::MemoryMgr.Allocate(String::Length(input), true, AllocationType::String);
-            filename = String::Copy(filename, (char*)(input + 6));
-            if (filename[String::Length(filename) - 1] == 0x20) { String::Delete(filename); }
+            char* filename = (char*)MemAlloc(StringUtil::Length(input), true, AllocationType::String);
+            filename = StringUtil::Copy(filename, (char*)(input + 6));
+            if (filename[StringUtil::Length(filename) - 1] == 0x20) { StringUtil::Delete(filename); }
 
             if (filename != nullptr)
             {
-                if (String::Length(filename) > 0)
+                if (StringUtil::Length(filename) > 0)
                 {
                     char* path = Kernel::CLI->PathToCLIPath(filename);
                     if (!Kernel::FileSys->IOFileExists(path)) { Kernel::CLI->Debug.Error("Unable to locate file %s", filename); }
@@ -519,12 +519,12 @@ namespace PMOS
                     { 
                         char* filedata = Kernel::FileSys->IOReadAllText(path);
                         Kernel::Terminal->WriteLine(filedata);
-                        Kernel::MemoryMgr.Free(filedata);
+                        MemFree(filedata);
                     }
-                    Kernel::MemoryMgr.Free(path);
+                    MemFree(path);
                 }
 
-                Kernel::MemoryMgr.Free(filename);
+                MemFree(filename);
             }
         }
 
@@ -532,13 +532,13 @@ namespace PMOS
         {
             if (args.Count < 2) { Kernel::CLI->Debug.Error("Please specify a file or directory"); return; }
            
-            char* filename = (char*)Kernel::MemoryMgr.Allocate(String::Length(input), true, AllocationType::String);
-            filename = String::Copy(filename, (char*)(input + 7));
-            if (filename[String::Length(filename) - 1] == 0x20) { String::Delete(filename); }
+            char* filename = (char*)MemAlloc(StringUtil::Length(input), true, AllocationType::String);
+            filename = StringUtil::Copy(filename, (char*)(input + 7));
+            if (filename[StringUtil::Length(filename) - 1] == 0x20) { StringUtil::Delete(filename); }
 
             if (filename != nullptr)
             {
-                if (String::Length(filename) > 0)
+                if (StringUtil::Length(filename) > 0)
                 {
                     char* path = Kernel::CLI->PathToCLIPath(filename);
 
@@ -559,10 +559,10 @@ namespace PMOS
                             Kernel::CLI->Debug.WriteLine("SIZE            %d", file->Size); 
                         }
                     }
-                    Kernel::MemoryMgr.Free(path);
+                    MemFree(path);
                 }
 
-                Kernel::MemoryMgr.Free(filename);
+                MemFree(filename);
             }
         }
 

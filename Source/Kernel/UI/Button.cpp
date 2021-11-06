@@ -57,7 +57,7 @@ namespace PMOS
                 // draw text
                 if (TextVisible)
                 {
-                    int tw = String::Length(Text) * (Style.FontStyle->Width  + Style.FontStyle->SpacingX);
+                    int tw = StringUtil::Length(Text) * (Style.FontStyle->Width  + Style.FontStyle->SpacingX);
                     int th = Style.FontStyle->Height + Style.FontStyle->SpacingY;
 
                     if (TextAlign == Alignment::MiddleCenter)
@@ -80,7 +80,7 @@ namespace PMOS
                 // draw text
                 if (TextVisible)
                 {
-                    int tw = String::Length(Text) * (Style.FontStyle->Width  + Style.FontStyle->SpacingX);
+                    int tw = StringUtil::Length(Text) * (Style.FontStyle->Width  + Style.FontStyle->SpacingX);
                     int th = Style.FontStyle->Height + Style.FontStyle->SpacingY;
 
                     if (TextAlign == Alignment::MiddleCenter)

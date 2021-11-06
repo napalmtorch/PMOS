@@ -73,8 +73,8 @@ namespace PMOS
     {
         void CPUManager::Detect()
         {
-            if (Name == nullptr) { Kernel::MemoryMgr.Free(Name); }
-            if (Vendor == nullptr) { Kernel::MemoryMgr.Free(Vendor); }
+            if (Name == nullptr) { MemFree(Name); }
+            if (Vendor == nullptr) { MemFree(Vendor); }
 
              // Register storage
             uint eax, ebx, ecx, edx;
@@ -84,8 +84,8 @@ namespace PMOS
             char vendor[13];
             GetCPUInfo(0, &largestStandardFunc, (uint *)(vendor + 0), (uint *)(vendor + 8), (uint *)(vendor + 4));
             vendor[12] = '\0';
-            Vendor = (char*)Kernel::MemoryMgr.Allocate(32, true, AllocationType::String);
-            String::Copy(Vendor, vendor);
+            Vendor = (char*)MemAlloc(32, true, AllocationType::String);
+            StringUtil::Copy(Vendor, vendor);
 
             // Function 0x01 - Feature Information
             if (largestStandardFunc >= 0x01)
@@ -132,8 +132,8 @@ namespace PMOS
                 // Processor name is right justified with leading spaces
                 const char *p = name;
                 while (*p == ' ') { ++p; }
-                Name = (char*)Kernel::MemoryMgr.Allocate(String::Length(name) + 1, true, AllocationType::String);
-                String::Copy(Name, (char*)p);
+                Name = (char*)MemAlloc(StringUtil::Length(name) + 1, true, AllocationType::String);
+                StringUtil::Copy(Name, (char*)p);
             }
         }
 

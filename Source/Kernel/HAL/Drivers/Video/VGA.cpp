@@ -226,7 +226,7 @@ namespace PMOS
                 if (Started)
                 {
                     Buffer = GetFrameBufferSegment();
-                    if (DoubleBuffered) { BackBuffer = (byte*)Kernel::MemoryMgr.Allocate(Width * Height, true, AllocationType::Bitmap); }
+                    if (DoubleBuffered) { BackBuffer = (byte*)MemAlloc(Width * Height, true, AllocationType::Bitmap); }
                     Kernel::Debug.Info("Set VGA mode to %s", VGAModeToString(mode));
                     Clear(0x00);
                     EnableCursor(0, 15);

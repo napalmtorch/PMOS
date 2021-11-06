@@ -11,12 +11,12 @@ namespace PMOS
         void RTCController::Initialize()
         {
             // allocate strings
-            TimeString = (char*)Kernel::MemoryMgr.Allocate(64, true, AllocationType::String);
-            DateString = (char*)Kernel::MemoryMgr.Allocate(64, true, AllocationType::String);
+            TimeString = (char*)MemAlloc(64, true, AllocationType::String);
+            DateString = (char*)MemAlloc(64, true, AllocationType::String);
 
             // clear strings
-            String::Clear(TimeString);
-            String::Clear(DateString);
+            StringUtil::Clear(TimeString);
+            StringUtil::Clear(DateString);
 
             // default properties
             MilitaryTime = false;
@@ -76,31 +76,31 @@ namespace PMOS
         
         void RTCController::UpdateStrings()
         {
-            String::Clear(TimeString);
+            StringUtil::Clear(TimeString);
             char num[64];
 
             // 24-hour
             if (MilitaryTime)
             {
                 // hour
-                String::FromDecimal(Hour, num);
-                if (Hour < 10) { String::Append(TimeString, '0'); }
-                String::Append(TimeString, num);
-                String::Append(TimeString, ':');
+                StringUtil::FromDecimal(Hour, num);
+                if (Hour < 10) { StringUtil::Append(TimeString, '0'); }
+                StringUtil::Append(TimeString, num);
+                StringUtil::Append(TimeString, ':');
 
                 // minute
-                String::FromDecimal(Minute, num);
-                if (Minute < 10) { String::Append(TimeString, '0'); }
-                String::Append(TimeString, num);
+                StringUtil::FromDecimal(Minute, num);
+                if (Minute < 10) { StringUtil::Append(TimeString, '0'); }
+                StringUtil::Append(TimeString, num);
 
                 // if seconds are visible
                 if (ShowSeconds)
                 {
                     // second
-                    String::Append(TimeString, ':');
-                    String::FromDecimal(Second, num);
-                    if (Second < 10) { String::Append(TimeString, '0'); }
-                    String::Append(TimeString, num);
+                    StringUtil::Append(TimeString, ':');
+                    StringUtil::FromDecimal(Second, num);
+                    if (Second < 10) { StringUtil::Append(TimeString, '0'); }
+                    StringUtil::Append(TimeString, num);
                 }
             }
             // 12-hour
@@ -115,28 +115,28 @@ namespace PMOS
                 else if (Hour == 0) { hr = 12; }
 
                 // append hour
-                String::FromDecimal(hr, num);
-                String::Append(TimeString, num);
-                String::Append(TimeString, ':');
+                StringUtil::FromDecimal(hr, num);
+                StringUtil::Append(TimeString, num);
+                StringUtil::Append(TimeString, ':');
 
                 // minute
-                String::FromDecimal(Minute, num);
-                if (Minute < 10) { String::Append(TimeString, '0'); }
-                String::Append(TimeString, num);
+                StringUtil::FromDecimal(Minute, num);
+                if (Minute < 10) { StringUtil::Append(TimeString, '0'); }
+                StringUtil::Append(TimeString, num);
 
                 // if seconds are visible
                 if (ShowSeconds)
                 {
                     // second
-                    String::Append(TimeString, ':');
-                    String::FromDecimal(Second, num);
-                    if (Second < 10) { String::Append(TimeString, '0'); }
-                    String::Append(TimeString, num);
+                    StringUtil::Append(TimeString, ':');
+                    StringUtil::FromDecimal(Second, num);
+                    if (Second < 10) { StringUtil::Append(TimeString, '0'); }
+                    StringUtil::Append(TimeString, num);
                 }
 
                 // AM or PM
-                if (Hour < 12) { String::Append(TimeString, " AM"); }
-                else { String::Append(TimeString, " PM"); }
+                if (Hour < 12) { StringUtil::Append(TimeString, " AM"); }
+                else { StringUtil::Append(TimeString, " PM"); }
             }
         }
 

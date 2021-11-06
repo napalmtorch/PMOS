@@ -44,7 +44,7 @@ namespace PMOS
                 Service::Stop();
 
                 Kernel::ServiceMgr.Stop(Kernel::WinMgr);
-                Kernel::MemoryMgr.Free(Canvas.Buffer);
+                MemFree(Canvas.Buffer);
             }
 
             void XServerHost::Update()
@@ -57,9 +57,9 @@ namespace PMOS
 
                     Kernel::ThreadMgr.CalculateCPUUsage();
 
-                    String::Clear(FPSString);
-                    String::FromDecimal(FPS, FPSString);
-                    String::Append(FPSString, " FPS");
+                    StringUtil::Clear(FPSString);
+                    StringUtil::FromDecimal(FPS, FPSString);
+                    StringUtil::Append(FPSString, " FPS");
 
                     LastTime = Time;
                 }
@@ -98,7 +98,7 @@ namespace PMOS
 
                 float cpu = Kernel::ThreadMgr.GetCPUUsage();
                 char temp[64];
-                Canvas.DrawString(0, 16, String::FromFloat(cpu, temp, 4), Colors::White, Fonts::Serif8x8);
+                Canvas.DrawString(0, 16, StringUtil::FromFloat(cpu, temp, 4), Colors::White, Fonts::Serif8x8);
 
                 if (Kernel::WinMgr != nullptr)
                 {

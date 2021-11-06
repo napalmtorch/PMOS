@@ -32,13 +32,13 @@ namespace PMOS
             StackSize = STACK_SIZE;
 
             // create stack
-            Stack = (byte*)Kernel::MemoryMgr.Allocate(StackSize, true, AllocationType::ThreadStack);
+            Stack = (byte*)MemAlloc(StackSize, true, AllocationType::ThreadStack);
 
             // set registers pointer
             Registers = (ISRRegs*)(((uint)Stack + StackSize) - sizeof(ISRRegs));
 
             // copy name
-            for (uint i = 0; i < 64; i++) { if (i < String::Length(name)) { Properties.Name[i] = name[i]; } }
+            for (uint i = 0; i < 64; i++) { if (i < StringUtil::Length(name)) { Properties.Name[i] = name[i]; } }
             
             // set properties
             Properties.Priority = priority;
@@ -66,13 +66,13 @@ namespace PMOS
             StackSize = stack;
 
             // create stack
-            Stack = (byte*)Kernel::MemoryMgr.Allocate(StackSize, true, AllocationType::ThreadStack);
+            Stack = (byte*)MemAlloc(StackSize, true, AllocationType::ThreadStack);
 
             // set registers pointer
             Registers = (ISRRegs*)(((uint)Stack + StackSize) - sizeof(ISRRegs));
 
             // copy name
-            for (uint i = 0; i < 64; i++) { if (i < String::Length(name)) { Properties.Name[i] = name[i]; } }
+            for (uint i = 0; i < 64; i++) { if (i < StringUtil::Length(name)) { Properties.Name[i] = name[i]; } }
             
             // set properties
             Properties.Priority = priority;
@@ -95,10 +95,10 @@ namespace PMOS
         void Thread::Dispose()
         {
             // free stack memory
-            Kernel::MemoryMgr.Free(Stack);
+            MemFree(Stack);
 
             // free thread
-            Kernel::MemoryMgr.Free(this);
+            MemFree(this);
         }
 
         // calculate ticks per second of thread

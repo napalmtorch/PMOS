@@ -1,5 +1,6 @@
 #pragma once
 #include <Kernel/Lib/Types.hpp>
+#include <Kernel/Services/MemoryMgr.hpp>
 
 namespace PMOS
 {
@@ -85,3 +86,8 @@ extern void operator delete(void *p);
 extern void operator delete(void *p, size_t size);
 extern void operator delete[](void *p);
 extern void operator delete[](void *p, size_t size);
+
+void* MemAlloc(size_t size);
+void* MemAlloc(size_t size, bool clear, PMOS::AllocationType type = PMOS::AllocationType::Default);
+void  MemFree(void* ptr);
+void  MemFreeArray(void** ptr, size_t len);

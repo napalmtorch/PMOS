@@ -44,6 +44,8 @@ namespace PMOS
                 // register interrupt
                 Kernel::InterruptMgr.Register(IRQ1, (ISR)PS2KeyboardCallback);
 
+                HAL::Ports::Write8(0x64, 0xAE);
+
                 // clear states
                 ClearKeymap();
 
@@ -78,10 +80,10 @@ namespace PMOS
                     if (key == (byte)KeyPressed::BACKSPACE)
                     {
                         // handle backspace
-                        if (String::Length(out) > 0)
+                        if (StringUtil::Length(out) > 0)
                         {
                             if (CurrentStream->GetSize() == 0) { return; }
-                            String::Delete(out);
+                            StringUtil::Delete(out);
                             CurrentStream->Seek(CurrentStream->GetPosition() - 1);
                             if (TerminalOutput) { Kernel::Terminal->Delete(); }
                         }

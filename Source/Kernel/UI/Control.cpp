@@ -121,9 +121,9 @@ namespace PMOS
         void Control::Dispose()
         {
             OnDestroy();
-            if (Text != nullptr) { Kernel::MemoryMgr.Free(Text); }
-            if (Name != nullptr) { Kernel::MemoryMgr.Free(Name); }
-            if (Tag != nullptr)  { Kernel::MemoryMgr.Free(Tag); }
+            if (Text != nullptr) { MemFree(Text); }
+            if (Name != nullptr) { MemFree(Name); }
+            if (Tag != nullptr)  { MemFree(Tag); }
         }
 
         void Control::InvokeRefresh()
@@ -335,40 +335,40 @@ namespace PMOS
         void Control::SetText(char* text)
         {
             Kernel::Debug.WriteLine("TEXT: %s", text);
-            if (Text != nullptr) { Kernel::MemoryMgr.Free(Text); }
+            if (Text != nullptr) { MemFree(Text); }
             if (text != nullptr)
             {
                 // input is blank
-                if (String::Length(text) == 0) { Text = (char*)Kernel::MemoryMgr.Allocate(1); Text[0] = 0; return; }
+                if (StringUtil::Length(text) == 0) { Text = (char*)MemAlloc(1); Text[0] = 0; return; }
                 // input has value - copy it
-                Text = (char*)Kernel::MemoryMgr.Allocate(String::Length(text) + 1, true, AllocationType::String);
-                String::Copy(Text, text);
+                Text = (char*)MemAlloc(StringUtil::Length(text) + 1, true, AllocationType::String);
+                StringUtil::Copy(Text, text);
             }
         }
 
         void Control::SetName(char* name)
         {
-            if (Name != nullptr) { Kernel::MemoryMgr.Free(Name); }
+            if (Name != nullptr) { MemFree(Name); }
             if (name != nullptr)
             {
                 // input is blank
-                if (String::Length(name) == 0) { Text = (char*)Kernel::MemoryMgr.Allocate(1); Name[0] = 0; return; }
+                if (StringUtil::Length(name) == 0) { Text = (char*)MemAlloc(1); Name[0] = 0; return; }
                 // input has value - copy it
-                Name = (char*)Kernel::MemoryMgr.Allocate(String::Length(name) + 1, true, AllocationType::String);
-                String::Copy(Name, name);
+                Name = (char*)MemAlloc(StringUtil::Length(name) + 1, true, AllocationType::String);
+                StringUtil::Copy(Name, name);
             }
         }
 
         void Control::SetTag(char* tag)
         {
-            if (Tag != nullptr) { Kernel::MemoryMgr.Free(Tag); }
+            if (Tag != nullptr) { MemFree(Tag); }
             if (tag != nullptr)
             {
                 // input is blank
-                if (String::Length(tag) == 0) { Text = (char*)Kernel::MemoryMgr.Allocate(1); Tag[0] = 0; return; }
+                if (StringUtil::Length(tag) == 0) { Text = (char*)MemAlloc(1); Tag[0] = 0; return; }
                 // input has value - copy it
-                Tag = (char*)Kernel::MemoryMgr.Allocate(String::Length(tag) + 1, true, AllocationType::String);
-                String::Copy(Tag, tag);
+                Tag = (char*)MemAlloc(StringUtil::Length(tag) + 1, true, AllocationType::String);
+                StringUtil::Copy(Tag, tag);
             }
         }
 

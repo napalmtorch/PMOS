@@ -3,7 +3,7 @@
 
 namespace PMOS
 {
-    namespace String
+    namespace StringUtil
     {
         size_t Length(char* text);
         char*  ToUpper(char* text);
@@ -43,4 +43,52 @@ namespace PMOS
         bool   StartsWith(char* text, char* start);
         bool   EndsWith(char* text, char* end);
     }
+
+    class String
+    {
+        private:
+            char* Data;
+            uint  Length;
+
+        public:
+            String();
+            String(char* str);
+            String(const String& str);
+            String(String&& str);
+            ~String();
+            void Dispose();
+
+        public:
+            uint GetLength();
+            char* GetData();
+
+        public:
+            void Clear();
+            void Set(char* str);
+            void Set(const String& str);
+            void Set(String&& str);
+            void Append(char c);
+            void Append(char* str);
+            void Append(const String& str);
+            void Append(String&& str);
+
+        public:
+            bool Equals(char* str);
+            bool Equals(String& str);
+
+        public:
+            bool operator==(char* str);
+            bool operator==(String& str);
+
+            String& operator+(char c);
+            String& operator+(char* str);
+            String& operator+(const char* str);
+            String& operator+=(char c);
+            String& operator+=(char* str);
+            String& operator+=(const String& str);
+
+            String& operator=(char* str);
+            String& operator=(const String& str);
+            String& operator=(String&& str);
+    };
 }

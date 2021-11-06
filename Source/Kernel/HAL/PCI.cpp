@@ -22,11 +22,11 @@ namespace PMOS
         {
             if (Devices != nullptr) 
             { 
-                for (int i = 0; i < MaxCount; i++) { if (Devices[i] != nullptr) { Kernel::MemoryMgr.Free(Devices[i]); } }
-                Kernel::MemoryMgr.Free(Devices); 
+                for (int i = 0; i < MaxCount; i++) { if (Devices[i] != nullptr) { MemFree(Devices[i]); } }
+                MemFree(Devices); 
             }
 
-            Devices = (PCIDevice**)Kernel::MemoryMgr.Allocate(MaxCount * sizeof(PCIDevice*), true, AllocationType::System);
+            Devices = (PCIDevice**)MemAlloc(MaxCount * sizeof(PCIDevice*), true, AllocationType::System);
             Count = 0;
 
             for (ushort bus = 0; bus < 256; bus++)
@@ -51,8 +51,8 @@ namespace PMOS
                             byte   bist       = (byte)(ReadWord(bus, slot, func, 0x0F) >> 8);
                             uint   bar0       = (uint)((ReadWord(bus, slot, func, 0x10) << 16) | ReadWord(bus, slot, func, 0x12));
 
-                            PCIDevice* device = (PCIDevice*)Kernel::MemoryMgr.Allocate(sizeof(PCIDevice), true, AllocationType::PCIDevice);
-                            String::Copy(device->Name, (char*)GetDeviceName(vendorID, deviceID));
+                            PCIDevice* device = (PCIDevice*)MemAlloc(sizeof(PCIDevice), true, AllocationType::PCIDevice);
+                            StringUtil::Copy(device->Name, (char*)GetDeviceName(vendorID, deviceID));
                             device->VendorID = vendorID;
                             device->DeviceID = deviceID;
                             device->Command  = command;

@@ -3,7 +3,7 @@
 
 namespace PMOS
 {
-    namespace String
+    namespace StringUtil
     {
         const char HexValues[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
@@ -352,7 +352,7 @@ namespace PMOS
             ins = src;
             for (count = 0; (tmp = StartAt(ins, rep)); ++count) { ins = tmp + len_rep; }
 
-            tmp = result = (char*)Kernel::MemoryMgr.Allocate(Length(src) + (len_with - len_rep) * count + 1, true, AllocationType::String);
+            tmp = result = (char*)MemAlloc(Length(src) + (len_with - len_rep) * count + 1, true, AllocationType::String);
 
             if (!result) { return nullptr; }
 
@@ -384,7 +384,7 @@ namespace PMOS
             }
 
             uint arr_size = sizeof(char*) * (num_delimeters + 1);
-            char** str_array = (char**)Kernel::MemoryMgr.Allocate(arr_size, true, AllocationType::String);
+            char** str_array = (char**)MemAlloc(arr_size, true, AllocationType::String);
             int str_offset = 0;
 
             int start = 0;
@@ -393,7 +393,7 @@ namespace PMOS
             {
                 while(str[end] != delim && end < len) { end++; }
 
-                char* substr = (char*)Kernel::MemoryMgr.Allocate(end - start + 1, true, AllocationType::String);
+                char* substr = (char*)MemAlloc(end - start + 1, true, AllocationType::String);
                 Memory::Copy(substr, str + start, end - start);
                 start = end + 1;
                 end++;
@@ -413,20 +413,20 @@ namespace PMOS
             int last = -1;
             for (int i = 0, ind = 0; i < (int)len; i += IndexOf(text + i, sep) + 1, ind++)
             {
-                if (i == last) { if (str != nullptr) { Kernel::MemoryMgr.Free(str); } break; }
+                if (i == last) { if (str != nullptr) { MemFree(str); } break; }
                 if (index == ind)
                 {
                     int len = IndexOf(text+i, sep);
                     if (len < 0)
                         len = Length(text+i);
-                    str = (char*)Kernel::MemoryMgr.Allocate(len + 1, true, AllocationType::String);
+                    str = (char*)MemAlloc(len + 1, true, AllocationType::String);
                     for (int xi = 0; xi < len; xi++)
                         str[xi] = (text+i)[xi];
                     str[len] = 0;
                     return str;
                 }
                 last = i;
-                if (str != nullptr) { Kernel::MemoryMgr.Free(str); str = nullptr; }
+                if (str != nullptr) { MemFree(str); str = nullptr; }
             }
             
             return (char*)nullptr;
@@ -457,5 +457,210 @@ namespace PMOS
             for (int i = Length(text), s = Length(end); s > 0 && i > 0; i--, s--) { if (text[i] != end[s]) { return false; } }
             return true;
         }
+    }
+
+    String::String()
+    {
+        Clear();
+    }
+
+    String::String(char* str)
+    {
+        if (str == nullptr) { Clear(); return; }
+
+        Clear();
+        Length = StringUtil::Length(str);
+        Data = (char*)MemAlloc(Length, true, AllocationType::String);
+        Memory::Copy(Data, str, Length);
+    }
+
+    String::String(const String& str)
+    {
+        Clear();
+        Length = str.Length;
+        Data = (char*)MemAlloc(Length, true, AllocationType::String);
+        Memory::Copy(Data, str.Data, Length);
+    }
+
+    String::String(String&& str)
+    {
+        Clear();
+        Length = str.Length;
+        Data = (char*)MemAlloc(Length, true, AllocationType::String);
+        Memory::Copy(Data, str.Data, Length);
+    }
+
+    String::~String()
+    {
+        Dispose();
+    }
+
+    void String::Dispose()
+    {
+        if (Data != nullptr) { MemFree(Data); }
+        Data = nullptr;
+        Length = 0;
+    }
+
+    uint String::GetLength() { return Length; }
+    
+    char* String::GetData() { return Data; }
+
+    void String::Clear()
+    {
+        Dispose();
+    }
+
+    void String::Set(char* str)
+    {
+        Dispose();
+        if (str == nullptr) { Length = 0; return; }
+        Length = StringUtil::Length(str);
+        Data = (char*)MemAlloc(Length, true, AllocationType::String);
+        Memory::Copy(Data, str, Length);
+    }
+
+    void String::Set(const String& str)
+    {
+        Dispose();
+        if (&str == nullptr) { Length = 0; return; }
+        if (str.Data == nullptr) { Length = 0; return; }
+        Length = str.Length;
+        Data = (char*)MemAlloc(Length, true, AllocationType::String);
+        Memory::Copy(Data, str.Data, Length);
+    }
+
+    void String::Set(String&& str)
+    {
+        Dispose();
+        if (&str == nullptr) { Length = 0; return; }
+        if (str.Data == nullptr) { Length = 0; return; }
+        Length = str.Length;
+        Data = (char*)MemAlloc(Length, true, AllocationType::String);
+        Memory::Copy(Data, str.Data, Length);
+    }
+
+    void String::Append(char c)
+    {
+        uint oldLen = Length;
+        char* data = (char*)MemAlloc(oldLen + 1, true, AllocationType::String);
+        Memory::Copy(data, Data, oldLen);
+        StringUtil::Append(data, c);
+        Dispose();
+        Length = oldLen + 1;
+        Data = data;
+    }
+
+    void String::Append(char* str)
+    {
+        if (Length == 0 || Data == nullptr) { Set(str); return; }
+
+        uint len = StringUtil::Length(str);
+        char* data = (char*)MemAlloc(Length + len, true, AllocationType::String);
+        Memory::Copy(data, Data, Length);
+        StringUtil::Append(data, str);
+        Dispose();
+        Length += len;
+        Data = data;
+    }
+
+    void String::Append(const String& str)
+    {
+        uint len = str.Length;
+        char* data = (char*)MemAlloc(Length + len, true, AllocationType::String);
+        Memory::Copy(data, Data, Length);
+        StringUtil::Append(data, str.Data);
+        Dispose();
+        Length += len;
+        Data = data;
+    }
+
+    void String::Append(String&& str)
+    {
+        uint len = str.Length;
+        char* data = (char*)MemAlloc(Length + len, true, AllocationType::String);
+        Memory::Copy(data, Data, Length);
+        StringUtil::Append(data, str.Data);
+        Dispose();
+        Length += len;
+        Data = data;
+    }
+
+    bool String::Equals(char* str)
+    {
+        if (str == nullptr) { return false; }
+        if (Length != StringUtil::Length(str)) { return false; }
+        return StringUtil::Equals(Data, str);
+    }
+
+    bool String::Equals(String& str)
+    {
+        if (Length != StringUtil::Length(str.Data)) { return false; }
+        return StringUtil::Equals(Data, str.Data);
+    }
+    
+    bool String::operator==(char* str)
+    {
+        return Equals(str);
+    }
+    bool String::operator==(String& str)
+    {
+        return Equals(str);
+    }
+
+    String& String::operator+(const char* str)
+    {
+        String s;
+        s.Append(Data);
+        s.Append((char*)str);
+        
+        delete str;
+        Dispose();
+        return s;
+    }
+
+    String& String::operator+(char c)
+    {
+        Append(c);
+        return *this;
+    }
+
+    String& String::operator+(char* str)
+    {
+        Append(str);
+        return *this;
+    }
+
+    String& String::operator+=(char* str)
+    {
+        Append(str);
+        return *this;
+    }
+
+    String& String::operator+=(const String& str)
+    {
+        Append(str);
+        return *this;
+    }
+
+    String& String::operator=(char* str)
+    {
+        if (StringUtil::Equals(str, Data)) { return *this; }
+        Set(str);
+        return *this;
+    }
+
+    String& String::operator=(const String& str)
+    {
+        if (StringUtil::Equals(str.Data, Data)) { return *this; }
+        Set(str);
+        return *this;
+    }
+    
+    String& String::operator=(String&& str)
+    {
+        if (StringUtil::Equals(str.Data, Data)) { return *this; }
+        Set(str);
+        return *this;
     }
 }

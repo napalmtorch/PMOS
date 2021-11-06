@@ -2,6 +2,7 @@
 #include <Kernel/Lib/Types.hpp>
 #include <Kernel/Lib/String.hpp>
 #include <Kernel/Lib/Math.hpp>
+#include <Kernel/Lib/Map.hpp>
 #include <Kernel/Lib/Memory.hpp>
 #include <Kernel/HAL/Ports.hpp>
 #include <Kernel/HAL/Serial.hpp>

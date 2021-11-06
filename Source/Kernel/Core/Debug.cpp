@@ -60,21 +60,21 @@ namespace PMOS
                 {
                     int dec = va_arg(args, int);
                     char str[16];
-                    WriteUnformatted(String::FromDecimal(dec, str));
+                    WriteUnformatted(StringUtil::FromDecimal(dec, str));
                     text++;
                 }
                 else if (*text == 'u')
                 {
                     uint dec = va_arg(args, uint);
                     char str[16];
-                    WriteUnformatted(String::FromDecimal(dec, str));
+                    WriteUnformatted(StringUtil::FromDecimal(dec, str));
                     text++;
                 }
                 else if (*text == 'x')
                 {
                     uint num = va_arg(args, uint);
                     char str[16];
-                    WriteUnformatted(String::FromHex(num, str, false));
+                    WriteUnformatted(StringUtil::FromHex(num, str, false));
                     text++;
                 }
                 else if (*text == '2')
@@ -83,7 +83,7 @@ namespace PMOS
                     if (*text != 'x' && *text != 'X') { WriteChar(*text); text++; continue; }
                     uint num = va_arg(args, uint);
                     char str[16];
-                    WriteUnformatted(String::FromHex(num, str, false, 1));
+                    WriteUnformatted(StringUtil::FromHex(num, str, false, 1));
                     text++;
                 }
                 else if (*text == '4')
@@ -92,7 +92,7 @@ namespace PMOS
                     if (*text != 'x' && *text != 'X') { WriteChar(*text); text++; continue; }
                     uint num = va_arg(args, uint);
                     char str[16];
-                    WriteUnformatted(String::FromHex(num, str, false, 2));
+                    WriteUnformatted(StringUtil::FromHex(num, str, false, 2));
                     text++;
                 }
                 else if (*text == '8')
@@ -101,14 +101,14 @@ namespace PMOS
                     if (*text != 'x' && *text != 'X') { WriteChar(*text); text++; continue; }
                     uint num = va_arg(args, uint);
                     char str[16];
-                    WriteUnformatted(String::FromHex(num, str, false, 4));
+                    WriteUnformatted(StringUtil::FromHex(num, str, false, 4));
                     text++;
                 }
                 else if (*text == 'f')
                 {
                     double f = va_arg(args, double);
                     char str[32];
-                    WriteUnformatted(String::FromFloat((float)f, str, 4));
+                    WriteUnformatted(StringUtil::FromFloat((float)f, str, 4));
                     text++;
                 }
                 else if (*text == 's')
@@ -238,7 +238,7 @@ namespace PMOS
         byte* src = (byte*)ptr;
 
         WriteUnformatted("Dumping memory at: ");
-        String::FromHex((uint)src, temp, false, 4);
+        StringUtil::FromHex((uint)src, temp, false, 4);
         WriteUnformatted(temp, Col4::Cyan);
         NewLine();
 
@@ -249,22 +249,22 @@ namespace PMOS
             // address range
             pos = i * bytes_per_line;
             chars[0] = '\0';
-            String::FromHex((uint)(src + pos), temp, false, 4);
+            StringUtil::FromHex((uint)(src + pos), temp, false, 4);
             WriteUnformatted(temp, Col4::Cyan); WriteUnformatted(":");
-            String::FromHex((uint)(src + pos + (bytes_per_line - 1)), temp, false, 4);
+            StringUtil::FromHex((uint)(src + pos + (bytes_per_line - 1)), temp, false, 4);
             WriteUnformatted(temp, Col4::Cyan);
             WriteUnformatted("    ");
 
             // bytes
             for (size_t j = 0; j < bytes_per_line; j++)
             {
-                String::FromHex(src[pos + j], temp, false, 1);
+                StringUtil::FromHex(src[pos + j], temp, false, 1);
                 if (src[pos + j] > 0) { Write(temp); }
                 else { WriteUnformatted(temp, Col4::Red); }
                 Write(" ");
 
-                if (src[pos + j] >= 32 && src[pos + j] <= 126) { String::Append(chars, src[pos + j]); }
-                else { String::Append(chars, '.'); }
+                if (src[pos + j] >= 32 && src[pos + j] <= 126) { StringUtil::Append(chars, src[pos + j]); }
+                else { StringUtil::Append(chars, '.'); }
             }
 
             WriteUnformatted("    ");

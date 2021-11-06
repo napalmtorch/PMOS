@@ -41,6 +41,9 @@ namespace PMOS
                 RightButton = false;
                 Memory::Set(Buffer, 0, sizeof(Buffer));
 
+                // register interrupt
+                Kernel::InterruptMgr.Register(IRQ12, (ISR)PS2MouseCallback);
+
                 // setup device
                 Ports::Write8(0x64, 0xA8);
                 Ports::Write8(0x64, 0x20);
@@ -50,9 +53,6 @@ namespace PMOS
                 Ports::Write8(0x64, 0xD4);
                 Ports::Write8(0x60, 0xF4);
                 (void)Ports::Read8(0x60);
-
-                // register interrupt
-                Kernel::InterruptMgr.Register(IRQ12, (ISR)PS2MouseCallback);
             }
 
             void PS2Mouse::Stop()

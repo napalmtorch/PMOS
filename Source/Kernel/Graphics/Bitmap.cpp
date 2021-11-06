@@ -17,7 +17,7 @@ namespace PMOS
             Kernel::Debug.Write("Loading ");
             Kernel::Debug.WriteLine(fullname);
             VFS::FileEntry file = Kernel::FileSys->IOOpenFile(fullname);
-            if (file.Size == 0 || String::Length(file.Name) == 0) { Kernel::Debug.Error("Unable to locate file %s", fullname); return; }
+            if (file.Size == 0 || StringUtil::Length(file.Name) == 0) { Kernel::Debug.Error("Unable to locate file %s", fullname); return; }
 
             bmp_fileheader_t* h = (bmp_fileheader_t*)file.Data;
             uint offset = h->off_bits;
@@ -28,10 +28,10 @@ namespace PMOS
             Height = info->height;
             ImageData = (byte*)((uint)file.Data + offset);
             Depth = info->bit_count;
-            if (Width == 0 || Height == 0 || Depth == 0 || file.Size < 0 || String::Length(file.Name) == 0) 
+            if (Width == 0 || Height == 0 || Depth == 0 || file.Size < 0 || StringUtil::Length(file.Name) == 0) 
             { Kernel::Debug.Error("Unable to parse bitmap %s", fullname); return; }
 
-            uint* new_data = (uint*)Kernel::MemoryMgr.Allocate(Width * Height * 4, true, AllocationType::Bitmap);
+            uint* new_data = (uint*)MemAlloc(Width * Height * 4, true, AllocationType::Bitmap);
             Size = Width * Height * 4;
             for (int yy = Height - 1; yy >= 0; yy--)
             {
@@ -56,12 +56,12 @@ namespace PMOS
 
             ImageData = (byte*)new_data;
             Kernel::Debug.OK("Successfully loaded bitmap %s", fullname);
-            Kernel::MemoryMgr.Free((void*)file.Data);
+            MemFree((void*)file.Data);
         }
 
         void Bitmap::Dispose() 
         { 
-            Kernel::MemoryMgr.Free(ImageData);
+            MemFree(ImageData);
         }
 
         void Bitmap::Create(int w, int h, byte depth)
@@ -69,14 +69,14 @@ namespace PMOS
             Width = w;
             Height = h;
             Depth = depth;
-            ImageData = (byte*)Kernel::MemoryMgr.Allocate(Width * Height * (byte)Depth, true, AllocationType::Bitmap);
+            ImageData = (byte*)MemAlloc(Width * Height * (byte)Depth, true, AllocationType::Bitmap);
         }
 
 
         void Bitmap::Resize(int w, int h)
         {
             Kernel::Debug.Info("Resizing bitmap");
-            uint* temp = (uint*)Kernel::MemoryMgr.Allocate(w * h * sizeof(uint), true, AllocationType::Bitmap);
+            uint* temp = (uint*)MemAlloc(w * h * sizeof(uint), true, AllocationType::Bitmap);
             double x_ratio = (double)Width / (double)w;
             double y_ratio = (double)Height / (double)h;
             int px, py;
@@ -89,7 +89,7 @@ namespace PMOS
                     temp[(i * w) + j] = ((uint*)ImageData)[(int)((py * Width) + px)];
                 }
             }
-            if (ImageData != nullptr) { Kernel::MemoryMgr.Free(ImageData); }
+            if (ImageData != nullptr) { MemFree(ImageData); }
             ImageData = (byte*)temp;
             Width = w;
             Height = h;

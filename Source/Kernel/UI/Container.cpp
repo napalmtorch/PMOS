@@ -35,14 +35,14 @@ namespace PMOS
 
         void Container::OnDestroy()
         {
-            if (RenderImage != nullptr) { RenderImage->Dispose(); Kernel::MemoryMgr.Free(RenderImage); RenderImage = nullptr; }
+            if (RenderImage != nullptr) { RenderImage->Dispose(); MemFree(RenderImage); RenderImage = nullptr; }
             Renderer.SetBitmap(nullptr);
 
             if (ControlCount > 0)
             {
-                for (uint i = 0; i < ControlCount; i++) { Kernel::MemoryMgr.Free(Controls[i]); }
+                for (uint i = 0; i < ControlCount; i++) { MemFree(Controls[i]); }
             }
-            Kernel::MemoryMgr.Free(Controls);
+            MemFree(Controls);
 
             Control::OnDestroy();
         }
@@ -55,7 +55,7 @@ namespace PMOS
             {
                 if (Bounds.Width != WidthOld || Bounds.Height != HeightOld)
                 {
-                    if (RenderImage != nullptr) { RenderImage->Dispose(); Kernel::MemoryMgr.Free(RenderImage); }
+                    if (RenderImage != nullptr) { RenderImage->Dispose(); MemFree(RenderImage); }
                     RenderImage = new Graphics::Bitmap(Bounds.Width, Bounds.Height, 32);
                     Renderer.SetBitmap(RenderImage);
                     InvokeRefresh();
@@ -84,8 +84,7 @@ namespace PMOS
 
             // clear background
             Renderer.SetBitmap(RenderImage);
-            Kernel::Debug.WriteLine("RW: %d  RH: %d", RenderImage->Width, RenderImage->Height);
-            
+
             if (!OverrideDraw)
             {
                 Renderer.DrawFilledRect(0, 0, Bounds.Width, Bounds.Height, Style.GetColor(0));
@@ -132,7 +131,7 @@ namespace PMOS
             { for (size_t i = 0; i < ControlCount; i++) { temp[i] = Controls[i]; } }
 
             // delete old array if exists
-            if (Controls != nullptr) { Kernel::MemoryMgr.Free(Controls); }
+            if (Controls != nullptr) { MemFree(Controls); }
 
             // assign new array
             Controls = temp;
@@ -174,7 +173,7 @@ namespace PMOS
                 }
 
                 // delete old array
-                Kernel::MemoryMgr.Free(Controls);
+                MemFree(Controls);
 
                 // assign new array
                 Controls = temp;
@@ -215,7 +214,7 @@ namespace PMOS
                 }
 
                 // delete old array
-                Kernel::MemoryMgr.Free(Controls);
+                MemFree(Controls);
 
                 // assign new array
                 Controls = temp;

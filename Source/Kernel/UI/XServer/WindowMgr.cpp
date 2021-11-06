@@ -25,7 +25,7 @@ namespace PMOS
             MaxCount = 256;
 
             if (Windows != nullptr) { Kernel::MemoryMgr.FreeArray((void**)Windows, MaxCount); }
-            Windows = (Window**)Kernel::MemoryMgr.Allocate(MaxCount * sizeof(Window*), true, AllocationType::System);
+            Windows = (Window**)MemAlloc(MaxCount * sizeof(Window*), true, AllocationType::System);
             WindowCount = 0;
 
             ActiveIndex = -1;
@@ -181,7 +181,7 @@ namespace PMOS
                     Kernel::Debug.Info("Closed window: %s", win->Name);
                     if (ActiveIndex == i || ActiveWindow == win) { ActiveIndex = -1; ActiveWindow = nullptr; }
                     win->Dispose();
-                    Kernel::MemoryMgr.Free(win);
+                    MemFree(win);
                     Windows[i] = nullptr;
                     return true;
                 }

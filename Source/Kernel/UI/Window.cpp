@@ -108,10 +108,10 @@ namespace PMOS
             SetText(title);
             SetName(name);
             
-            if (args != nullptr && String::Length(args) > 0)
+            if (args != nullptr && StringUtil::Length(args) > 0)
             {
-                Arguments = (char*)Kernel::MemoryMgr.Allocate(String::Length(args) + 1, true, AllocationType::String);
-                String::Copy(Arguments, args);
+                Arguments = (char*)MemAlloc(StringUtil::Length(args) + 1, true, AllocationType::String);
+                StringUtil::Copy(Arguments, args);
             }
 
             SetStyle((VisualStyle*)&WindowStyle);
@@ -156,10 +156,10 @@ namespace PMOS
             BtnClose->Dispose();
             BtnMax->Dispose();
             BtnMin->Dispose();
-            Kernel::MemoryMgr.Free(BtnClose);
-            Kernel::MemoryMgr.Free(BtnMax);
-            Kernel::MemoryMgr.Free(BtnMin);
-            if (Arguments != nullptr) { Kernel::MemoryMgr.Free(Arguments); }
+            MemFree(BtnClose);
+            MemFree(BtnMax);
+            MemFree(BtnMin);
+            if (Arguments != nullptr) { MemFree(Arguments); }
             Kernel::Debug.Info("Destroyed window: ", Name);
         }
 

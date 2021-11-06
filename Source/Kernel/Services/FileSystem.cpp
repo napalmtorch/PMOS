@@ -54,14 +54,14 @@ namespace PMOS
         {
             // create new block table data array
             if (SuperBlock.BlockTable.SizeInBytes == 0) { return; }
-            if (BlockTableData != nullptr) { Kernel::MemoryMgr.Free(BlockTableData); }
-            BlockTableData = (byte*)Kernel::MemoryMgr.Allocate(SuperBlock.BlockTable.SizeInBytes, true, AllocationType::System);
+            if (BlockTableData != nullptr) { MemFree(BlockTableData); }
+            BlockTableData = (byte*)MemAlloc(SuperBlock.BlockTable.SizeInBytes, true, AllocationType::System);
             Memory::Set(BlockTableData, 0, SuperBlock.BlockTable.SizeInBytes);
 
             // create new entry table data array
             if (SuperBlock.EntryTable.SizeInBytes == 0) { return; }
-            if (EntryTableData != nullptr) { Kernel::MemoryMgr.Free(EntryTableData); }
-            EntryTableData = (byte*)Kernel::MemoryMgr.Allocate(SuperBlock.EntryTable.SizeInBytes, true, AllocationType::System);
+            if (EntryTableData != nullptr) { MemFree(EntryTableData); }
+            EntryTableData = (byte*)MemAlloc(SuperBlock.EntryTable.SizeInBytes, true, AllocationType::System);
             Memory::Set(EntryTableData, 0, SuperBlock.EntryTable.SizeInBytes);
         }
 
@@ -87,7 +87,7 @@ namespace PMOS
         void FSHost::PrintDirectoryContents(char* path)
         {
             if (path == nullptr) { return; }
-            if (String::Length(path) == 0) { return; }
+            if (StringUtil::Length(path) == 0) { return; }
 
             // validate path
             if (!IODirectoryExists(path)) { return; }
@@ -96,7 +96,7 @@ namespace PMOS
             uint dirs_len = 0, files_len = 0;
             DirectoryEntry** dirs = IOGetDirectories(path, &dirs_len);
             FileEntry** files = IOGetFiles(path, &files_len);
-            if (dirs_len == 0 && files_len == 0) { if (dirs != nullptr) { Kernel::MemoryMgr.Free(dirs); } if (files != nullptr) { Kernel::MemoryMgr.Free(files); } Kernel::CLI->Debug.WriteLine("No files found."); return; }
+            if (dirs_len == 0 && files_len == 0) { if (dirs != nullptr) { MemFree(dirs); } if (files != nullptr) { MemFree(files); } Kernel::CLI->Debug.WriteLine("No files found."); return; }
 
             // print directories
             for (uint i = 0; i < dirs_len; i++)
@@ -105,7 +105,7 @@ namespace PMOS
                 Kernel::CLI->Debug.WriteUnformatted("> ", Col4::Yellow);
                 Kernel::CLI->Debug.WriteUnformatted(dirs[i]->Name, Col4::Yellow);
                 Kernel::CLI->Debug.NewLine();
-                Kernel::MemoryMgr.Free(dirs[i]);
+                MemFree(dirs[i]);
             }
 
             // print files
@@ -113,11 +113,11 @@ namespace PMOS
             {
                 // print
                 Kernel::CLI->Debug.WriteLine(files[i]->Name);
-                Kernel::MemoryMgr.Free(files[i]);
+                MemFree(files[i]);
             }
 
-            Kernel::MemoryMgr.Free(dirs);
-            Kernel::MemoryMgr.Free(files);
+            MemFree(dirs);
+            MemFree(files);
         }
 
         // mount the file system
@@ -207,7 +207,7 @@ namespace PMOS
         {
             // clear disk
             Kernel::Debug.WriteLine("DISK SIZE: %d", DiskSize);
-            byte* data = (byte*)Kernel::MemoryMgr.Allocate(FS_SIZE_SECTOR);
+            byte* data = (byte*)MemAlloc(FS_SIZE_SECTOR);
             if (data != nullptr)
             {
                 Memory::Set(data, 0, FS_SIZE_SECTOR);
@@ -221,7 +221,7 @@ namespace PMOS
                 }
             }
             else { return; }
-            Kernel::MemoryMgr.Free(data);
+            MemFree(data);
             Kernel::Debug.NewLine();
         }
 
@@ -291,7 +291,7 @@ namespace PMOS
         void FSHost::ReadSuperBlock()
         {
             // create temporary data array for storing sector data
-            byte* data = (byte*)Kernel::MemoryMgr.Allocate(FS_SIZE_SECTOR);
+            byte* data = (byte*)MemAlloc(FS_SIZE_SECTOR);
             Kernel::ATA->Read(FS_SECTOR_SUPER, 1, data);
 
             // successfully allocated memory
@@ -303,7 +303,7 @@ namespace PMOS
                 DiskSize = super->BytesPerSector * super->SectorCount;
 
                 // free memory and message
-                Kernel::MemoryMgr.Free(data);
+                MemFree(data);
             }
         }
         
@@ -311,7 +311,7 @@ namespace PMOS
         void FSHost::WriteSuperBlock()
         {
             // create temporary data array for storing sector data
-            byte* data = (byte*)Kernel::MemoryMgr.Allocate(FS_SIZE_SECTOR);
+            byte* data = (byte*)MemAlloc(FS_SIZE_SECTOR);
 
             // successfully allocated memory
             if (data != nullptr)
@@ -325,7 +325,7 @@ namespace PMOS
                 Kernel::ATA->Write(FS_SECTOR_SUPER, 1, data);
 
                 // finished message
-                Kernel::MemoryMgr.Free(data);
+                MemFree(data);
             }
         }
         
@@ -352,7 +352,7 @@ namespace PMOS
             if (!IsBlockTableValid()) { Kernel::Debug.Error("Unable to validate block table before reading from disk"); return; }
 
             // create data array
-            byte* data = (byte*)Kernel::MemoryMgr.Allocate(FS_SIZE_SECTOR);
+            byte* data = (byte*)MemAlloc(FS_SIZE_SECTOR);
             if (data == nullptr) { Kernel::Debug.Error("Unable to allocate memory while reading block table from disk"); return; }
 
             // loop through block table sectors
@@ -368,7 +368,7 @@ namespace PMOS
             }
 
             // free data
-            if (data != nullptr) { Kernel::MemoryMgr.Free(data); }
+            if (data != nullptr) { MemFree(data); }
         }
 
         // write block table to disk
@@ -383,7 +383,7 @@ namespace PMOS
             for (uint sec = SuperBlock.BlockTable.StartSector; sec < SuperBlock.BlockTable.EndSector; sec++)
             {
                 // create temporary array
-                data = (byte*)Kernel::MemoryMgr.Allocate(FS_SIZE_SECTOR);
+                data = (byte*)MemAlloc(FS_SIZE_SECTOR);
                 if (data == nullptr) { Kernel::Debug.Error("Unable to allocate memory while writing block table to disk"); return; }
 
                 // copy data to temporary sector
@@ -395,10 +395,10 @@ namespace PMOS
                 Kernel::ATA->Write(sec, 1, data);
 
                 // free data
-                Kernel::MemoryMgr.Free(data);
+                MemFree(data);
             }
 
-            if (data != nullptr) { Kernel::MemoryMgr.Free(data); }
+            if (data != nullptr) { MemFree(data); }
         }
 
         // read data from data block
@@ -424,11 +424,11 @@ namespace PMOS
             // if located, load block to array
             if (located)
             {
-                byte* output = (byte*)Kernel::MemoryMgr.Allocate(count * (ulong)FS_SIZE_SECTOR);
+                byte* output = (byte*)MemAlloc(count * (ulong)FS_SIZE_SECTOR);
                 if (output == nullptr) { Kernel::Debug.Error("Unable to allocate memory while reading data block"); return nullptr; }
 
                 uint index = 0;
-                byte* sec_data = (byte*)Kernel::MemoryMgr.Allocate(FS_SIZE_SECTOR);
+                byte* sec_data = (byte*)MemAlloc(FS_SIZE_SECTOR);
                 for (uint sec = sector; sec < sector + count; sec++)
                 {
                     Kernel::ATA->Read(sec, 1, sec_data);
@@ -443,12 +443,12 @@ namespace PMOS
                     else 
                     { 
                         Kernel::Debug.Error("Unable to allocate memory while reading sector during data block iteration"); 
-                        if (sec_data != nullptr) { Kernel::MemoryMgr.Free(sec_data); }
-                        if (output != nullptr) { Kernel::MemoryMgr.Free(output); }
+                        if (sec_data != nullptr) { MemFree(sec_data); }
+                        if (output != nullptr) { MemFree(output); }
                         return nullptr; }
                 }
 
-                Kernel::MemoryMgr.Free(sec_data);
+                MemFree(sec_data);
                 return output;
             }
             // unable to locate data block
@@ -497,13 +497,13 @@ namespace PMOS
                 {
                     // set entry state
                     entry->State = FS_STATE_FREE;
-                    byte* empty = (byte*)Kernel::MemoryMgr.Allocate(FS_SIZE_SECTOR);
+                    byte* empty = (byte*)MemAlloc(FS_SIZE_SECTOR);
                     // clear data from block
                     if (empty != nullptr)
                     {
                         Memory::Set(empty, 0, FS_SIZE_SECTOR);
                         for (size_t i = 0; i < count; i++) { Kernel::ATA->Write(entry->Sector + i, 1, empty); }
-                        Kernel::MemoryMgr.Free(empty);
+                        MemFree(empty);
                     }
                     // merge available blocks
                     MergeAvailableBlocks();
@@ -811,7 +811,7 @@ namespace PMOS
             if (!IsEntryTableValid()) { Kernel::Debug.Error("Unable to validate entry table before reading from disk"); return; }
 
             // loop through entry table sectors
-            byte* data = (byte*)Kernel::MemoryMgr.Allocate(FS_SIZE_SECTOR);
+            byte* data = (byte*)MemAlloc(FS_SIZE_SECTOR);
             uint table_offset = 0;
             for (uint sec = 0; sec < SuperBlock.EntryTable.SectorCount; sec++)
             {
@@ -821,12 +821,12 @@ namespace PMOS
 
                 // copy data from sector to table array
                 if (table_offset < SuperBlock.EntryTable.SizeInBytes) { Memory::Copy((void*)(EntryTableData + table_offset), data, FS_SIZE_SECTOR); }
-                else { if (data != nullptr) { Kernel::MemoryMgr.Free(data); } Kernel::Debug.Error("Memory write violation while reading entry table"); return; }
+                else { if (data != nullptr) { MemFree(data); } Kernel::Debug.Error("Memory write violation while reading entry table"); return; }
                 table_offset += FS_SIZE_SECTOR;
             }
 
             // free data
-            if (data != nullptr) { Kernel::MemoryMgr.Free(data); }
+            if (data != nullptr) { MemFree(data); }
         }
 
         // write entry table to disk
@@ -841,7 +841,7 @@ namespace PMOS
             for (uint sec = SuperBlock.EntryTable.StartSector; sec < SuperBlock.EntryTable.EndSector; sec++)
             {
                 // create temporary array
-                data = (byte*)Kernel::MemoryMgr.Allocate(FS_SIZE_SECTOR);
+                data = (byte*)MemAlloc(FS_SIZE_SECTOR);
                 if (data == nullptr) { Kernel::Debug.Error("Unable to allocate memory while writing entry table to disk"); return; }
 
                 // copy data to temporary sector
@@ -853,7 +853,7 @@ namespace PMOS
                 Kernel::ATA->Write(sec, 1, data);
 
                 // free data
-                Kernel::MemoryMgr.Free(data);
+                MemFree(data);
             }
 
             Kernel::Debug.OK("Finished writing entry table to disk");
@@ -941,7 +941,7 @@ namespace PMOS
                 // read entry from table
                 FileEntry* temp = (FileEntry*)(EntryTableData + (i * (ulong)FS_SIZE_FILE_ENTRY));
 
-                if (temp == entry && String::Equals(temp->Name, centry->Name) && temp->Type == EntryType::File)
+                if (temp == entry && StringUtil::Equals(temp->Name, centry->Name) && temp->Type == EntryType::File)
                 {
                     // clear data and return success
                     Memory::Set(temp, 0, FS_SIZE_FILE_ENTRY);
@@ -974,8 +974,8 @@ namespace PMOS
         // easily free a character array
         void FreeCharArray(char** args, uint* len)
         {
-            for (uint i = 0; i < *len; i++) { Kernel::MemoryMgr.Free(args[i]); }
-            Kernel::MemoryMgr.Free(args);
+            for (uint i = 0; i < *len; i++) { MemFree(args[i]); }
+            MemFree(args);
         }
 
         // delete blank entries from list
@@ -987,20 +987,20 @@ namespace PMOS
             // count valid entries
             for (uint i = 0; i < len; i++)
             {
-                if (String::Length(args[i]) > 0) { output_len++; }
+                if (StringUtil::Length(args[i]) > 0) { output_len++; }
             }
 
             // create new array
-            output = (char**)Kernel::MemoryMgr.Allocate(output_len * sizeof(char*));
+            output = (char**)MemAlloc(output_len * sizeof(char*));
 
             // add new entries
             int index = 0;
             for (uint i = 0; i < len; i++)
             {
-                if (String::Length(args[i]) > 0)
+                if (StringUtil::Length(args[i]) > 0)
                 {
-                    char* str = (char*)Kernel::MemoryMgr.Allocate(String::Length(args[i]));
-                    String::Copy(str, args[i]);
+                    char* str = (char*)MemAlloc(StringUtil::Length(args[i]));
+                    StringUtil::Copy(str, args[i]);
                     output[index] = str;
                     index++;
                 }
@@ -1015,11 +1015,11 @@ namespace PMOS
         {
             // validate path string
             if (path == nullptr) { return nullptr; }
-            if (String::Length(path) == 0) { return nullptr; }
+            if (StringUtil::Length(path) == 0) { return nullptr; }
 
             // split path into peices
             uint args_len = 0;
-            char** args = String::Split(path, '/', &args_len);
+            char** args = StringUtil::Split(path, '/', &args_len);
 
             // check if parent is root
             if (args_len <= 2 && path[0] == '/') { FreeCharArray(args, &args_len); return (DirectoryEntry*)EntryTableData; }
@@ -1037,7 +1037,7 @@ namespace PMOS
                     index = 0;
 
                     // validate path part
-                    if (args[arg] != nullptr && String::Length(args[arg]) > 0)
+                    if (args[arg] != nullptr && StringUtil::Length(args[arg]) > 0)
                     {
                         // loop through entries in table
                         for (size_t i = 0; i < SuperBlock.EntryTable.SizeInBytes; i += FS_SIZE_FILE_ENTRY)
@@ -1046,7 +1046,7 @@ namespace PMOS
                             FileEntry* entry = (FileEntry*)(EntryTableData + i);
 
                             // found match for current piece of path
-                            if (entry->Type != EntryType::Null && entry->ParentIndex == (uint)p && String::Equals(entry->Name, args[arg]))
+                            if (entry->Type != EntryType::Null && entry->ParentIndex == (uint)p && StringUtil::Equals(entry->Name, args[arg]))
                             {
                                 p = index;
                                 output = entry;
@@ -1075,7 +1075,7 @@ namespace PMOS
         {
             // validate path string
             if (path == nullptr) { return nullptr; }
-            if (String::Length(path) == 0) { return nullptr; }
+            if (StringUtil::Length(path) == 0) { return nullptr; }
 
             // atytempt to fetch parent of file
             DirectoryEntry* parent = GetParentFromPath(path);
@@ -1085,16 +1085,16 @@ namespace PMOS
 
             // split path into peices
             uint args_len = 0;
-            char** args = String::Split(path, '/', &args_len);
+            char** args = StringUtil::Split(path, '/', &args_len);
             if (args_len == 0) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Unable to split path while getting file by name"); return nullptr; }
             char* filename;
             int xx = args_len - 1;
             while (args[xx] != nullptr)
             {
-                if (args[xx] != nullptr && String::Length(args[xx]) > 0) { filename = args[xx]; break; }
+                if (args[xx] != nullptr && StringUtil::Length(args[xx]) > 0) { filename = args[xx]; break; }
                 if (xx == 0) { break; } xx--;
             }
-            if (String::Length(filename) == 0 || filename == nullptr) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Invalid file name while getting file by name"); return nullptr; }
+            if (StringUtil::Length(filename) == 0 || filename == nullptr) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Invalid file name while getting file by name"); return nullptr; }
 
             // get parent index
             uint parent_index = GetFileIndex(parent);
@@ -1106,7 +1106,7 @@ namespace PMOS
                 FileEntry* entry = (FileEntry*)(EntryTableData + i);
 
                 // found file in entry table
-                if (entry->ParentIndex == parent_index && String::Equals(filename, entry->Name) && entry->Type == EntryType::File) 
+                if (entry->ParentIndex == parent_index && StringUtil::Equals(filename, entry->Name) && entry->Type == EntryType::File) 
                 { 
                     FreeCharArray(args, &args_len);
                     return entry; 
@@ -1123,29 +1123,29 @@ namespace PMOS
         {
             // validate path string
             if (path == nullptr) { return nullptr; }
-            if (String::Length(path) == 0) { return nullptr; }
+            if (StringUtil::Length(path) == 0) { return nullptr; }
 
             // atytempt to fetch parent of file
             DirectoryEntry* parent = GetParentFromPath(path);
 
             // check if path is root
-            if (String::Equals(path, "/")) { return (DirectoryEntry*)EntryTableData; }
+            if (StringUtil::Equals(path, "/")) { return (DirectoryEntry*)EntryTableData; }
 
             // validate parent
             if (parent == nullptr) { Kernel::Debug.Error("Unable to locate parent while getting directory by name"); return nullptr; }
 
             // split path into peices
             uint args_len = 0;
-            char** args = String::Split(path, '/', &args_len);
+            char** args = StringUtil::Split(path, '/', &args_len);
             if (args_len == 0) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Unable to split path while getting directory by name"); return nullptr; }
             char* dirname;
             int xx = args_len - 1;
             while (args[xx] != nullptr)
             {
-                if (args[xx] != nullptr && String::Length(args[xx]) > 0) { dirname = args[xx]; break; }
+                if (args[xx] != nullptr && StringUtil::Length(args[xx]) > 0) { dirname = args[xx]; break; }
                 if (xx == 0) { break; } xx--;
             }
-            if (String::Length(dirname) == 0 || dirname == nullptr) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Invalid directory name while getting directory by name"); return nullptr; }
+            if (StringUtil::Length(dirname) == 0 || dirname == nullptr) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Invalid directory name while getting directory by name"); return nullptr; }
 
             // get parent index
             uint parent_index = GetFileIndex(parent);
@@ -1157,7 +1157,7 @@ namespace PMOS
                 DirectoryEntry* entry = (DirectoryEntry*)(EntryTableData + i);
 
                 // found file in entry table
-                if (entry->ParentIndex == parent_index && String::Equals(dirname, entry->Name) && entry->Type == EntryType::Directory) 
+                if (entry->ParentIndex == parent_index && StringUtil::Equals(dirname, entry->Name) && entry->Type == EntryType::Directory) 
                 { 
                     FreeCharArray(args, &args_len);
                     return entry; 
@@ -1211,7 +1211,7 @@ namespace PMOS
         char* FSHost::IOGetParent(char* path)
         {
             // get length of input string
-            uint len = String::Length(path);
+            uint len = StringUtil::Length(path);
             
             // loop through input string reverse
             for (int i = len - 1; i >= 0; i--)
@@ -1220,21 +1220,21 @@ namespace PMOS
                 if (path[i] == '/') 
                 { 
                     // delete slash
-                    String::Delete(path); 
+                    StringUtil::Delete(path); 
                     // terminate string
-                    String::Append(path, '\0');
+                    StringUtil::Append(path, '\0');
                     // add slash to end incase all characters have been removed
-                    if (String::Length(path) == 0) { String::Append(path, "/"); }
+                    if (StringUtil::Length(path) == 0) { StringUtil::Append(path, "/"); }
                     return path; 
                 }
                 // delete character before final slash
-                else { String::Delete(path); }
+                else { StringUtil::Delete(path); }
             }
             
             // terminate string
-            String::Append(path, '\0');
+            StringUtil::Append(path, '\0');
             // add slash to end incase all characters have been removed
-            if (String::Length(path) == 0) { String::Append(path, "/"); }
+            if (StringUtil::Length(path) == 0) { StringUtil::Append(path, "/"); }
             
             // return modified input path
             return path;
@@ -1247,7 +1247,7 @@ namespace PMOS
             {
                 path = IOGetParent(path);	
             }
-            if (String::Length(path) == 0) { String::Append(path, "/"); }
+            if (StringUtil::Length(path) == 0) { StringUtil::Append(path, "/"); }
             return path;
         }
 
@@ -1281,7 +1281,7 @@ namespace PMOS
         FileEntry FSHost::IOCreateFile(char* path, uint size, bool write)
         {
             // validate arguments
-            if (String::Length(path) == 0 || size == 0) { return NullFile; }
+            if (StringUtil::Length(path) == 0 || size == 0) { return NullFile; }
 
             // get parent directory
             DirectoryEntry* parent = GetParentFromPath(path);
@@ -1293,23 +1293,23 @@ namespace PMOS
         
             // split path into peices
             uint args_len = 0;
-            char** args = String::Split(path, '/', &args_len);
+            char** args = StringUtil::Split(path, '/', &args_len);
             if (args_len == 0) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Unable to split path while creating blank file"); return NullFile; }
             char* filename;
             int xx = args_len - 1;
             while (args[xx] != nullptr)
             {
-                if (args[xx] != nullptr && String::Length(args[xx]) > 0) { filename = args[xx]; break; }
+                if (args[xx] != nullptr && StringUtil::Length(args[xx]) > 0) { filename = args[xx]; break; }
                 if (xx == 0) { break; } xx--;
             }
-            if (String::Length(filename) == 0 || filename == nullptr) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Invalid file name while creating blank file"); return NullFile; }
-            while (String::Length(filename) > 38) { String::Delete(filename); }
+            if (StringUtil::Length(filename) == 0 || filename == nullptr) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Invalid file name while creating blank file"); return NullFile; }
+            while (StringUtil::Length(filename) > 38) { StringUtil::Delete(filename); }
 
 
             // set properties
             FileEntry file;
             Memory::Set(file.Name, 0, 38);
-            Memory::Copy(file.Name, filename, String::Length(filename));
+            Memory::Copy(file.Name, filename, StringUtil::Length(filename));
             file.Type = EntryType::File;
             file.Size = size;
             file.ParentIndex = GetFileIndex(parent);
@@ -1330,7 +1330,7 @@ namespace PMOS
         FileEntry FSHost::IOCreateFile(char* path, uint size, byte* data, bool write)
         {
             // validate arguments
-            if (String::Length(path) == 0 || size == 0) { return NullFile; }
+            if (StringUtil::Length(path) == 0 || size == 0) { return NullFile; }
 
             // get parent directory
             DirectoryEntry* parent = GetParentFromPath(path);
@@ -1340,23 +1340,23 @@ namespace PMOS
 
             // split path into peices
             uint args_len = 0;
-            char** args = String::Split(path, '/', &args_len);
+            char** args = StringUtil::Split(path, '/', &args_len);
             if (args_len == 0) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Unable to split path while creating blank file"); return NullFile; }
             char* filename;
             int xx = args_len - 1;
             while (args[xx] != nullptr)
             {
-                if (args[xx] != nullptr && String::Length(args[xx]) > 0) { filename = args[xx]; break; }
+                if (args[xx] != nullptr && StringUtil::Length(args[xx]) > 0) { filename = args[xx]; break; }
                 if (xx == 0) { break; } xx--;
             }
-            if (String::Length(filename) == 0 || filename == nullptr) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Invalid file name while creating blank file"); return NullFile; }
-            while (String::Length(filename) > 38) { String::Delete(filename); }
+            if (StringUtil::Length(filename) == 0 || filename == nullptr) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Invalid file name while creating blank file"); return NullFile; }
+            while (StringUtil::Length(filename) > 38) { StringUtil::Delete(filename); }
 
 
             // set properties
             FileEntry file;
             Memory::Set(file.Name, 0, 38);
-            Memory::Copy(file.Name, filename, String::Length(filename));
+            Memory::Copy(file.Name, filename, StringUtil::Length(filename));
             file.Type = EntryType::File;
             file.Size = size;
             file.ParentIndex = GetFileIndex(parent);
@@ -1372,7 +1372,7 @@ namespace PMOS
             BlockEntry* block = GetBlockEntry(fileptr->StartSector, fileptr->SectorCount, FS_STATE_USED);
 
             // copy data to data block
-            byte* temp = (byte*)Kernel::MemoryMgr.Allocate(FS_SIZE_SECTOR);
+            byte* temp = (byte*)MemAlloc(FS_SIZE_SECTOR);
             if (temp == nullptr || data == nullptr) { Kernel::Debug.Error("Unable to allocate memory while creating file"); FreeCharArray(args, &args_len); return NullFile; }
             uint total  = 0;
 
@@ -1390,7 +1390,7 @@ namespace PMOS
             }
 
             if (write) { WriteTables(); }
-            Kernel::MemoryMgr.Free(temp);
+            MemFree(temp);
             FreeCharArray(args, &args_len);
             return file;
         }
@@ -1400,7 +1400,7 @@ namespace PMOS
         DirectoryEntry FSHost::IOCreateDirectory(char* path, bool write)
         {
             // validate arguments
-            if (String::Length(path) == 0) { return NullDir; }
+            if (StringUtil::Length(path) == 0) { return NullDir; }
 
             // get parent directory
             DirectoryEntry* parent = GetParentFromPath(path);
@@ -1410,22 +1410,22 @@ namespace PMOS
 
             // split path into peices
             uint args_len = 0;
-            char** args = String::Split(path, '/', &args_len);
+            char** args = StringUtil::Split(path, '/', &args_len);
             if (args_len == 0) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Unable to split path while creating directory"); return NullDir; }
             char* dirname;
             int xx = args_len - 1;
             while (args[xx] != nullptr)
             {
-                if (args[xx] != nullptr && String::Length(args[xx]) > 0) { dirname = args[xx]; break; }
+                if (args[xx] != nullptr && StringUtil::Length(args[xx]) > 0) { dirname = args[xx]; break; }
                 if (xx == 0) { break; } xx--;
             }
-            if (String::Length(dirname) == 0 || dirname == nullptr) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Invalid directory name while creating directory"); return NullDir; }
-            while (String::Length(dirname) >= 48) { String::Delete(dirname); }
+            if (StringUtil::Length(dirname) == 0 || dirname == nullptr) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Invalid directory name while creating directory"); return NullDir; }
+            while (StringUtil::Length(dirname) >= 48) { StringUtil::Delete(dirname); }
 
             // set properties
             DirectoryEntry dir;
             Memory::Set(dir.Name, 0, 58);
-            Memory::Copy(dir.Name, dirname, String::Length(dirname));
+            Memory::Copy(dir.Name, dirname, StringUtil::Length(dirname));
             dir.ParentIndex = GetFileIndex(parent);
             dir.Type = EntryType::Directory;
             dir.Status = 0;
@@ -1444,7 +1444,7 @@ namespace PMOS
         {
             // validate path
             if (path == nullptr) { Kernel::Debug.Error("Null path while searching for file"); return false; }
-            if (String::Length(path) == 0) { Kernel::Debug.Error("Blank path while searching for file"); return false; }
+            if (StringUtil::Length(path) == 0) { Kernel::Debug.Error("Blank path while searching for file"); return false; }
 
             // get parent directory
             DirectoryEntry* parent = GetParentFromPath(path);
@@ -1455,17 +1455,17 @@ namespace PMOS
 
             // split path into peices
             uint args_len = 0;
-            char** args = String::Split(path, '/', &args_len);
+            char** args = StringUtil::Split(path, '/', &args_len);
             if (args_len == 0) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Unable to split path while searching for file"); return false; }
             char* filename;
             int xx = args_len - 1;
             while (args[xx] != nullptr)
             {
-                if (args[xx] != nullptr && String::Length(args[xx]) > 0) { filename = args[xx]; break; }
+                if (args[xx] != nullptr && StringUtil::Length(args[xx]) > 0) { filename = args[xx]; break; }
                 if (xx == 0) { break; } xx--;
             }
-            if (String::Length(filename) == 0 || filename == nullptr) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Invalid file name while searching for file"); return false; }
-            while (String::Length(filename) > 38) { String::Delete(filename); }
+            if (StringUtil::Length(filename) == 0 || filename == nullptr) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Invalid file name while searching for file"); return false; }
+            while (StringUtil::Length(filename) > 38) { StringUtil::Delete(filename); }
             Kernel::Debug.Info("FILENAME: ", filename);
 
             // loop through entries and locate
@@ -1474,7 +1474,7 @@ namespace PMOS
                 FileEntry* entry = (FileEntry*)(EntryTableData + i);
 
                 // located entry
-                if (entry->Type == EntryType::File && String::Length(entry->Name) > 0 && String::Equals(filename, entry->Name) && entry->ParentIndex == parent_index)
+                if (entry->Type == EntryType::File && StringUtil::Length(entry->Name) > 0 && StringUtil::Equals(filename, entry->Name) && entry->ParentIndex == parent_index)
                 { 
                     if (entry->Size == 0) { Kernel::Debug.Warning("File is empty."); }
                     FreeCharArray(args, &args_len); 
@@ -1494,10 +1494,10 @@ namespace PMOS
             if (path == nullptr) { return false; }
 
             // validate path
-            if (String::Length(path) == 0) { Kernel::Debug.Error("Path was null while searching for directory"); return false; }
+            if (StringUtil::Length(path) == 0) { Kernel::Debug.Error("Path was null while searching for directory"); return false; }
 
             // check if root
-            if (String::Equals(path, "/")) { return true; }
+            if (StringUtil::Equals(path, "/")) { return true; }
 
             // get parent directory
             DirectoryEntry* parent = GetParentFromPath(path);
@@ -1508,7 +1508,7 @@ namespace PMOS
 
             // split path into peices
             uint args_len = 0;
-            char** args = String::Split(path, '/', &args_len);
+            char** args = StringUtil::Split(path, '/', &args_len);
             if (args_len == 0) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Unable to split path while searching for directory"); return false; }
             char* dirname;
             int xx = args_len - 1;
@@ -1517,11 +1517,11 @@ namespace PMOS
             {
                 if (args[xx] != nullptr) 
                 {
-                    if (String::Length(args[xx]) > 0) { dirname = args[xx]; break; }
+                    if (StringUtil::Length(args[xx]) > 0) { dirname = args[xx]; break; }
                 }
                 if (xx == 0) { break; } xx--;
             }
-            if (String::Length(dirname) == 0 || dirname == nullptr) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Invalid directory name while searching for directory"); return false; }
+            if (StringUtil::Length(dirname) == 0 || dirname == nullptr) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Invalid directory name while searching for directory"); return false; }
 
             // loop through entries and locate
             for (ulong i = 0; i < SuperBlock.EntryTable.SizeInBytes; i += FS_SIZE_FILE_ENTRY)
@@ -1529,7 +1529,7 @@ namespace PMOS
                 DirectoryEntry* entry = (DirectoryEntry*)(EntryTableData + i);
 
                 // located entry
-                if (entry->Type == EntryType::Directory && String::Length(entry->Name) > 0 && String::Equals(dirname, entry->Name) && entry->ParentIndex == parent_index)
+                if (entry->Type == EntryType::Directory && StringUtil::Length(entry->Name) > 0 && StringUtil::Equals(dirname, entry->Name) && entry->ParentIndex == parent_index)
                 {
                     FreeCharArray(args, &args_len);
                     return true;
@@ -1603,7 +1603,7 @@ namespace PMOS
                 if (fileptr == nullptr) { Kernel::Debug.Error("Unexpected error while writing text to file"); return false; }
 
                 // get amount of sectors required
-                uint sectors = String::Length(text) / FS_SIZE_SECTOR;
+                uint sectors = StringUtil::Length(text) / FS_SIZE_SECTOR;
                 if (sectors < 1) { sectors = 1; }
 
                 // create new data block
@@ -1611,7 +1611,7 @@ namespace PMOS
                 if (new_block == nullptr) { Kernel::Debug.Error("Unable to allocate memory while writing text to file"); return false; }
 
                 // sector data array
-                byte* temp = (byte*)Kernel::MemoryMgr.Allocate(FS_SIZE_SECTOR);
+                byte* temp = (byte*)MemAlloc(FS_SIZE_SECTOR);
                 if (temp == nullptr) { Kernel::Debug.Error("Unable to allocate memory while writing text to file"); return false; }
                 uint total = 0;
                 uint size = 0;
@@ -1621,7 +1621,7 @@ namespace PMOS
                 {
                     for (uint i = 0; i < FS_SIZE_SECTOR; i++)
                     {
-                        if (total < String::Length(text)) { temp[i] = text[total]; size++; }
+                        if (total < StringUtil::Length(text)) { temp[i] = text[total]; size++; }
                         total++;
                     }
 
@@ -1638,7 +1638,7 @@ namespace PMOS
                 fileptr->SectorCount = new_block->Count;
                 fileptr->Size = size;
                 if (write) { WriteTables(); }
-                Kernel::MemoryMgr.Free(temp);
+                MemFree(temp);
 
                 // success
                 Kernel::Debug.OK("Finished writing text to %s", path);
@@ -1648,11 +1648,11 @@ namespace PMOS
             else
             {
                 // create new file
-                FileEntry file = IOCreateFile(path, String::Length(text) + 1, false);
+                FileEntry file = IOCreateFile(path, StringUtil::Length(text) + 1, false);
                 if (file.Type == EntryType::Null) { Kernel::Debug.Error("Unexpected error while creating file for writing"); return false; }
 
                 // sector data array
-                byte* temp = (byte*)Kernel::MemoryMgr.Allocate(FS_SIZE_SECTOR);
+                byte* temp = (byte*)MemAlloc(FS_SIZE_SECTOR);
                 if (temp == nullptr) { Kernel::Debug.Error("Unable to allocate memory while creating file"); return false; }
                 uint total = 0;
 
@@ -1661,7 +1661,7 @@ namespace PMOS
                 {
                     for (uint i = 0; i < FS_SIZE_SECTOR; i++)
                     {
-                        if (total < String::Length(text)) { temp[i] = text[total]; }
+                        if (total < StringUtil::Length(text)) { temp[i] = text[total]; }
                         total++;
                     }
 
@@ -1671,7 +1671,7 @@ namespace PMOS
 
                 // success
                 if (write) { WriteTables(); }
-                Kernel::MemoryMgr.Free(temp);
+                MemFree(temp);
                 Kernel::Debug.OK("Finished writing text to %s", path);
                 return true;
             }
@@ -1699,7 +1699,7 @@ namespace PMOS
                 if (new_block == nullptr) { Kernel::Debug.Error("Unable to allocate memory while writing data to file"); return false; }
 
                 // sector data array
-                byte* temp = (byte*)Kernel::MemoryMgr.Allocate(FS_SIZE_SECTOR);
+                byte* temp = (byte*)MemAlloc(FS_SIZE_SECTOR);
                 if (temp == nullptr) { Kernel::Debug.Error("Unable to allocate memory while writing data to file"); return false; }
                 uint total = 0;
                 uint n = 0;
@@ -1726,7 +1726,7 @@ namespace PMOS
                 fileptr->SectorCount = new_block->Count;
                 fileptr->Size = n;
                 if (write) { WriteTables(); }
-                Kernel::MemoryMgr.Free(temp);
+                MemFree(temp);
 
                 // success
                 Kernel::Debug.OK("Finished writing data to %s", path);
@@ -1740,7 +1740,7 @@ namespace PMOS
                 if (file.Type == EntryType::Null) { Kernel::Debug.Error("Unexpected error while creating file for writing"); return false; }
 
                 // sector data array
-                byte* temp = (byte*)Kernel::MemoryMgr.Allocate(FS_SIZE_SECTOR);
+                byte* temp = (byte*)MemAlloc(FS_SIZE_SECTOR);
                 if (temp == nullptr) { Kernel::Debug.Error("Unable to allocate memory while creating file"); return false; }
                 uint total = 0;
 
@@ -1759,7 +1759,7 @@ namespace PMOS
 
                 // success
                 if (write) { WriteTables(); }
-                Kernel::MemoryMgr.Free(temp);
+                MemFree(temp);
                 Kernel::Debug.OK("Finished writing data to %s", path);
                 return true;
             }
@@ -1789,11 +1789,11 @@ namespace PMOS
             if (data == nullptr) { Kernel::Debug.Error("Unexpected error reading data block during file read"); return nullptr; }
 
             // copy data to string
-            char* output = (char*)Kernel::MemoryMgr.Allocate(fileptr->Size + 2);
+            char* output = (char*)MemAlloc(fileptr->Size + 2);
             for (size_t i = 0; i < fileptr->Size; i++) { output[i] = data[i]; }
 
             // free unused data and return string
-            if (data != nullptr) { Kernel::MemoryMgr.Free(data); }
+            if (data != nullptr) { MemFree(data); }
             return output;
         }
 
@@ -1826,38 +1826,38 @@ namespace PMOS
             uint lines_count = 1;
 
             // count lines
-            for (uint i = 0; i < String::Length(file_text); i++)
+            for (uint i = 0; i < StringUtil::Length(file_text); i++)
             {
                 if (file_text[i] == '\n') { lines_count++; }
             }
 
             // allocate new array
-            char** output = (char**)Kernel::MemoryMgr.Allocate(sizeof(char*) * lines_count);
-            char* temp = (char*)Kernel::MemoryMgr.Allocate(4096);
+            char** output = (char**)MemAlloc(sizeof(char*) * lines_count);
+            char* temp = (char*)MemAlloc(4096);
 
             // add lines
             int index = 0;
             int len = 0;
-            for (uint i = 0; i < String::Length(file_text); i++)
+            for (uint i = 0; i < StringUtil::Length(file_text); i++)
             {
-                if (file_text[i] == '\n' || i == String::Length(file_text) - 1)
+                if (file_text[i] == '\n' || i == StringUtil::Length(file_text) - 1)
                 {
-                    output[index] = (char*)Kernel::MemoryMgr.Allocate(len + 1);
-                    String::Copy(output[index], temp);
+                    output[index] = (char*)MemAlloc(len + 1);
+                    StringUtil::Copy(output[index], temp);
                     index++;
                     len = 0;
-                    String::Clear(temp);
+                    StringUtil::Clear(temp);
                 }
                 else
                 {
-                    String::Append(temp, file_text[i]);
+                    StringUtil::Append(temp, file_text[i]);
                     len++;
                 }
             }
 
             // return list
-            Kernel::MemoryMgr.Free(temp);
-            Kernel::MemoryMgr.Free(file_text);
+            MemFree(temp);
+            MemFree(file_text);
             *count = lines_count;
             return output;
         }
@@ -1871,8 +1871,8 @@ namespace PMOS
             // get parent directory
             DirectoryEntry* parent = GetDirectoryByName(path);
             uint parent_index = GetFileIndex(parent);
-            if (parent == nullptr && !String::Equals(path, "/")) { Kernel::Debug.Error("Unable to locate parent while getting list of directories"); return nullptr; }
-            if (String::Equals(path, "/")) { parent_index = 0; }
+            if (parent == nullptr && !StringUtil::Equals(path, "/")) { Kernel::Debug.Error("Unable to locate parent while getting list of directories"); return nullptr; }
+            if (StringUtil::Equals(path, "/")) { parent_index = 0; }
 
             // count amount of entries in directory
             for (uint i = 0; i < SuperBlock.EntryTable.SizeInBytes; i += FS_SIZE_FILE_ENTRY)
@@ -1881,10 +1881,10 @@ namespace PMOS
                 DirectoryEntry* entry = (DirectoryEntry*)(EntryTableData + i);
 
                 // found valid entry
-                if (entry->Type == EntryType::Directory && String::Length(entry->Name) > 0 && entry->ParentIndex == parent_index && entry->Status != 1) { output_len++; }
+                if (entry->Type == EntryType::Directory && StringUtil::Length(entry->Name) > 0 && entry->ParentIndex == parent_index && entry->Status != 1) { output_len++; }
             }
 
-            output = (DirectoryEntry**)Kernel::MemoryMgr.Allocate(output_len * sizeof(DirectoryEntry*));
+            output = (DirectoryEntry**)MemAlloc(output_len * sizeof(DirectoryEntry*));
 
             // add directories to output
             int index = 0;
@@ -1894,10 +1894,10 @@ namespace PMOS
                 DirectoryEntry* entry = (DirectoryEntry*)(EntryTableData + i);
 
                 // found valid entry
-                if (entry->Type == EntryType::Directory && String::Length(entry->Name) > 0 && entry->ParentIndex == parent_index && entry->Status != 1)
+                if (entry->Type == EntryType::Directory && StringUtil::Length(entry->Name) > 0 && entry->ParentIndex == parent_index && entry->Status != 1)
                 {
                     // create new entry
-                    DirectoryEntry* dir = (DirectoryEntry*)Kernel::MemoryMgr.Allocate(FS_SIZE_FILE_ENTRY);
+                    DirectoryEntry* dir = (DirectoryEntry*)MemAlloc(FS_SIZE_FILE_ENTRY);
 
                     // copy properties
                     Memory::Copy(dir->Name, entry->Name, 58);
@@ -1926,8 +1926,8 @@ namespace PMOS
             // get parent directory
             DirectoryEntry* parent = GetDirectoryByName(path);
             uint parent_index = GetFileIndex(parent);
-            if (parent == nullptr && !String::Equals(path, "/")) { Kernel::Debug.Error("Unable to locate parent while getting list of files"); return nullptr; }
-            if (String::Equals(path, "/")) { parent_index = 0; }
+            if (parent == nullptr && !StringUtil::Equals(path, "/")) { Kernel::Debug.Error("Unable to locate parent while getting list of files"); return nullptr; }
+            if (StringUtil::Equals(path, "/")) { parent_index = 0; }
 
             // count amount of entries in directory
             for (uint i = 0; i < SuperBlock.EntryTable.SizeInBytes; i += FS_SIZE_FILE_ENTRY)
@@ -1936,10 +1936,10 @@ namespace PMOS
                 FileEntry* entry = (FileEntry*)(EntryTableData + i);
 
                 // found valid entry
-                if (entry->Type == EntryType::File && String::Length(entry->Name) > 0 && entry->ParentIndex == parent_index) { output_len++; }
+                if (entry->Type == EntryType::File && StringUtil::Length(entry->Name) > 0 && entry->ParentIndex == parent_index) { output_len++; }
             }
 
-            output = (FileEntry**)Kernel::MemoryMgr.Allocate(output_len * sizeof(FileEntry*));
+            output = (FileEntry**)MemAlloc(output_len * sizeof(FileEntry*));
 
             // add directories to output
             int index = 0;
@@ -1949,10 +1949,10 @@ namespace PMOS
                 FileEntry* entry = (FileEntry*)(EntryTableData + i);
 
                 // found valid entry
-                if (entry->Type == EntryType::File && String::Length(entry->Name) > 0 && entry->ParentIndex == parent_index)
+                if (entry->Type == EntryType::File && StringUtil::Length(entry->Name) > 0 && entry->ParentIndex == parent_index)
                 {
                     // create new entry
-                    FileEntry* file = (FileEntry*)Kernel::MemoryMgr.Allocate(FS_SIZE_FILE_ENTRY);
+                    FileEntry* file = (FileEntry*)MemAlloc(FS_SIZE_FILE_ENTRY);
 
                     // copy properties
                     Memory::Copy(file->Name, entry->Name, 58);

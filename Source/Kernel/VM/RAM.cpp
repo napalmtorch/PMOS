@@ -7,8 +7,8 @@ namespace PMOS
     {
         void RAMController::Initialize(uint size)
         {
-            if (Data != nullptr) { Kernel::MemoryMgr.Free(Data); }
-            Data = (byte*)Kernel::MemoryMgr.Allocate(size, true, AllocationType::VMRAM);
+            if (Data != nullptr) { MemFree(Data); }
+            Data = (byte*)MemAlloc(size, true, AllocationType::VMRAM);
             Size = size;
         }
 
@@ -66,7 +66,7 @@ namespace PMOS
         {
             int pos = 0;
             while (Data[addr + pos] != 0) { pos++; }
-            char* output = (char*)Kernel::MemoryMgr.Allocate(pos + 1);
+            char* output = (char*)MemAlloc(pos + 1);
             pos = 0;
             while (Data[addr + pos] != 0) { output[pos] = Data[addr + pos]; pos++; }
             return output;

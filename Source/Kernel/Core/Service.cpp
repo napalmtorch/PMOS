@@ -6,7 +6,7 @@ namespace PMOS
     Service::Service(char* name, ServiceType type)
     {
         // copy name
-        for (size_t i = 0; i < String::Length(name); i++) { if (i < 64) { this->Name[i] = name[i]; } }
+        for (size_t i = 0; i < StringUtil::Length(name); i++) { if (i < 64) { this->Name[i] = name[i]; } }
 
         // set type
         this->Type = type;
