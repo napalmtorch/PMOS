@@ -122,6 +122,8 @@ namespace PMOS
             Terminal->WriteLine("Version 0.2", Col4::DarkGray);
 
             CLI->Debug.WriteLine("MEM USED: %d bytes(%d MB)", MemoryMgr.GetRAMUsed(), MemoryMgr.GetRAMUsed() / 1024 / 1024);
+
+            Terminal->WriteLine("TEST");
         }
 
         void Run()
