@@ -1,6 +1,5 @@
 #pragma once
 #include <Kernel/Lib/Types.hpp>
-#include <Kernel/VM/Executable.hpp>
 #include <Kernel/VM/RAM.hpp>
 
 namespace PMOS
@@ -47,7 +46,6 @@ namespace PMOS
         {
             public:
                 BPURegisters Registers;
-                ExecutableHeader ExecHeader;
                 RAMController RAM;
                 
             private:
@@ -55,12 +53,12 @@ namespace PMOS
 
             public:
                 void Initialize();
-                void Load(ExecutableHeader header);
 
             public:
                 void Reset();
                 void Halt();
                 void Continue();
+                bool IsHalted();
 
             public:
                 void Step();

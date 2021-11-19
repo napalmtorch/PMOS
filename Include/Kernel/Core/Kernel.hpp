@@ -35,7 +35,6 @@
 #include <Kernel/UI/Button.hpp>
 #include <Kernel/UI/Container.hpp>
 #include <Kernel/UI/Window.hpp>
-#include <Kernel/VM/Executable.hpp>
 #include <Kernel/VM/BPU.hpp>
 #include <Kernel/VM/Runtime.hpp>
 #include <Kernel/Graphics/Bitmap.hpp>

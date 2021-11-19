@@ -1462,11 +1462,11 @@ namespace PMOS
             while (args[xx] != nullptr)
             {
                 if (args[xx] != nullptr && StringUtil::Length(args[xx]) > 0) { filename = args[xx]; break; }
-                if (xx == 0) { break; } xx--;
+                if (xx <= 0) { break; } xx--;
             }
             if (StringUtil::Length(filename) == 0 || filename == nullptr) { FreeCharArray(args, &args_len); Kernel::Debug.Error("Invalid file name while searching for file"); return false; }
             while (StringUtil::Length(filename) > 38) { StringUtil::Delete(filename); }
-            Kernel::Debug.Info("FILENAME: ", filename);
+            Kernel::Debug.Info("FILENAME: %s", filename);
 
             // loop through entries and locate
             for (ulong i = 0; i < SuperBlock.EntryTable.SizeInBytes; i += FS_SIZE_FILE_ENTRY)
@@ -1833,7 +1833,7 @@ namespace PMOS
 
             // allocate new array
             char** output = (char**)MemAlloc(sizeof(char*) * lines_count);
-            char* temp = (char*)MemAlloc(4096);
+            char* temp = (char*)MemAlloc(16384);
 
             // add lines
             int index = 0;
@@ -1842,7 +1842,7 @@ namespace PMOS
             {
                 if (file_text[i] == '\n' || i == StringUtil::Length(file_text) - 1)
                 {
-                    output[index] = (char*)MemAlloc(len + 1);
+                    output[index] = (char*)MemAlloc(len + 1, true, AllocationType::String);
                     StringUtil::Copy(output[index], temp);
                     index++;
                     len = 0;

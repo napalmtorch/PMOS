@@ -55,6 +55,7 @@ namespace PMOS
             RegisterCommand(Command("XSERVER", "Start graphical user interface", "xserver", CommandMethods::XSERVER));
             RegisterCommand(Command("VESAMODES", "Show list of supported VESA video modes", "veasmodes", CommandMethods::VESAMODES));
             RegisterCommand(Command("RUN", "Run an executable binary file", "run [file]", CommandMethods::RUN));
+            RegisterCommand(Command("SCRIPT", "Execute a shell command script", "script [file]", CommandMethods::SCRIPT));
             RegisterCommand(Command("DUMP", "Dump memory at specified address", "dump [addr] [size]", CommandMethods::DUMP));
             RegisterCommand(Command("PANIC", "Force a kernel level exception", "panic", CommandMethods::PANIC));
 
@@ -147,12 +148,10 @@ namespace PMOS
 
         void CommandLine::Execute()
         {
-            if (BufferPos < 0) { BufferPos = 0; return; }
+            if (BufferPos <= 0) { BufferPos = 0; return; }
 
             int pos = 0;
-            int count = BufferPos;
-            if (count == 0) { return; }
-            while (pos < count)
+            while (pos < BufferPos)
             {
                 char* input = CommandBuffer[pos];
                 if (StringUtil::Length(input) == 0) { PopCommand(); pos++; continue; }
@@ -202,6 +201,51 @@ namespace PMOS
             }
 
             PrintCaret();
+        }
+
+        void CommandLine::ExecuteFile(char* filename)
+        {
+            if (filename == nullptr) { Kernel::CLI->Debug.Error("No file specified"); return; }
+            if (StringUtil::Length(filename) == 0) { Kernel::CLI->Debug.Error("Invalid filename"); return; }
+            if (!Kernel::FileSys->IOFileExists(filename)) { Kernel::CLI->Debug.Error("Unable to locate file '%s'", filename); return; }
+
+            char* filedata = Kernel::FileSys->IOReadAllText(filename);
+
+            uint lines_count = 0;
+            char** lines = StringUtil::Split(filedata, '\n', &lines_count);
+
+            for (uint i = 0; i < lines_count; i++)
+            {
+                if (lines[i] == nullptr) { continue; }
+                if (StringUtil::Length(lines[i]) == 0) { continue; }
+                uint args_count = 0;
+                char** args = StringUtil::Split(lines[i], 0x20, &args_count);
+                if (args_count == 0) { continue; }
+
+                char* cmd = (char*)MemAlloc(StringUtil::Length(args[0]), true, AllocationType::String);
+                StringUtil::Copy(cmd, args[0]);
+                StringUtil::ToUpper(cmd);
+
+                bool success = false;
+                for (size_t j = 0; j < MaxCommandCount; j++)
+                {
+                    if (Commands[j]->Execute == nullptr) { continue; }
+                    if (StringUtil::Equals(Commands[j]->Name, cmd))
+                    {
+                        Commands[j]->Execute(lines[i], Array<char**>(args, args_count));
+                        success = true;
+                        break;
+                    }
+                }
+
+                if (!success) { Debug.Error("Invalid command"); }
+
+                MemFreeArray((void**)args, args_count);
+                MemFree(cmd);
+            }
+
+            MemFreeArray((void**)lines, lines_count);
+            MemFree(filedata);
         }
 
         int CommandLine::GetFreeIndex()
@@ -391,29 +435,17 @@ namespace PMOS
 
         void RUN(char* input, Array<char**> args)
         {
-            VirtualMachine::ExecutableHeader header;
-            VirtualMachine::Executable exec;
-            
-            byte prog[] = 
-            {
-                0x01, 0x00, 0xDE, 0xAD, 0xCA, 0xFE,
-                0x00,
-                0xFF,
-            };
+            VirtualMachine::RuntimeHost runtime;
+            runtime.Initialize("TestVM");
+            runtime.LoadTestProgram();
+            runtime.Run();
+        }
 
-
-            header.CodeSize = 8;
-            header.DataSize = 0;
-            header.StackSize = 0x1000;
-            header.RAMSize   = 0x10000;
-            header.CodeAddress = 0;
-            header.DataAddress = 0;
-            header.StackAddress = header.RAMSize - header.StackSize;
-            header.Type = (byte)VirtualMachine::ExecutableType::TerminalExecutable;
-
-            if (!exec.Create(header, prog)) { Kernel::CLI->Debug.Error("Unable to run executable"); return; }
-            
-            Kernel::CLI->Debug.WriteLine("RAM(addr = 0x00000000, size = %d bytes), STACK(addr = 0x%8x, size = %d bytes)", exec.GetRAMSize(), exec.GetStackAddress(), exec.GetStackSize());
+        void SCRIPT(char* input, Array<char**> args)
+        {
+            if (StringUtil::Length(input) < 7) { Kernel::CLI->Debug.Error("Expected filename"); return; }
+            char* filename = input + 7;
+            Kernel::CLI->ExecuteFile(filename);
         }
 
         void DUMP(char* input, Array<char**> args)
@@ -520,8 +552,20 @@ namespace PMOS
                     else 
                     { 
                         char* filedata = Kernel::FileSys->IOReadAllText(path);
-                        Kernel::Terminal->WriteLine(filedata);
+                        uint lines_count = 0;
+                        char** lines = StringUtil::Split(filedata, '\n', &lines_count);
+
+                        for (uint i = 0; i < lines_count; i++)
+                        {
+                            char line_str[16];
+                            Kernel::Terminal->Write("- ", Col4::DarkGray);
+                            Kernel::Terminal->Write(StringUtil::FromDecimal(i + 1, line_str), Col4::DarkGray);
+                            Kernel::Terminal->SetCursorX(7);
+                            Kernel::Terminal->WriteLine(lines[i]);
+                        }
+
                         MemFree(filedata);
+                        MemFreeArray((void**)lines, lines_count);
                     }
                     MemFree(path);
                 }

@@ -5,6 +5,7 @@ mkdir /sys/bin
 mkdir /sys/lib
 mkdir /sys/resources
 add /sys/resources/wallpaper.bmp Disk/sys/resources/wallpaper.bmp
+add /sys/boot.ini Disk/sys/boot.ini
 mkdir /users
 mkdir /users/root
 mkdir /users/public

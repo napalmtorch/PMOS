@@ -10,11 +10,12 @@ namespace PMOS
             if (Data != nullptr) { MemFree(Data); }
             Data = (byte*)MemAlloc(size, true, AllocationType::VMRAM);
             Size = size;
+            Kernel::CLI->Debug.Info("VM RAM INIT: DATA: 0x%8x, SIZE: %d", (uint)Data, Size);
         }
 
         void RAMController::Write8(uint addr, byte data)
         {
-            if (addr >= Size) { Kernel::Debug.Error("VM: Memory write(8-bit) out of bounds"); return; }
+            if (addr >= Size) { Kernel::Debug.Error("VM: Memory write(8-bit) out of bounds - 0x%8x", addr); return; }
             Data[addr] = data;
         }
 
@@ -46,7 +47,7 @@ namespace PMOS
 
         byte RAMController::Read8(uint addr)
         {
-            if (addr >= Size) { Kernel::Debug.Error("VM: Memory read(8-bit) out of bounds"); return 0; }
+            if (addr >= Size) { Kernel::Debug.Error("VM: Memory read(8-bit) out of bounds - 0x%8x", addr); return 0; }
             return Data[addr];
         }
 

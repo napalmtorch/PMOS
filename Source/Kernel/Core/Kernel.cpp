@@ -58,7 +58,7 @@ namespace PMOS
 
             MemoryMgr = Services::MemoryManager();
             MemoryMgr.Initialize();
-            MemoryMgr.ToggleMessages(false);
+            MemoryMgr.ToggleMessages(true);
 
             ServiceMgr = Services::ServiceManager();
             ServiceMgr.Initialize();

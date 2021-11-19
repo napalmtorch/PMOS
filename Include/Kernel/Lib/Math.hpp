@@ -37,5 +37,26 @@ namespace PMOS
         long double Round(long double x);
         double      Pow(double base, int exp);
         float       Pow(float base, int exp);
+
+        double Max(double a, double b);
+        float  Max(float a, float b);
+        
+        double Min(double a, double b);
+        float  Min(float a, float b);
+
+        double Sqrt(double v);
+        float  Sqrt(float v);
+
+        double Abs(double x);
+        float Abs(float x);
+
+        double Cos(double x);
+        float Cos(float x);
+
+        double Sin(double x);
+        float Sin(float x);
+
+        double Tan(double x);
+        float Tan(float x);
     }
 }

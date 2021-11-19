@@ -61,6 +61,7 @@ namespace PMOS
                 void PushCommand(char* input);
                 void PopCommand();
                 void Execute();
+                void ExecuteFile(char* filename);
                 void FreeCommands();
                 char* PathToCLIPath(char* path);
 
@@ -80,6 +81,7 @@ namespace PMOS
         void ENDLESS(char* input, Array<char**> args);
         void XSERVER(char* input, Array<char**> args);
         void RUN(char* input, Array<char**> args);
+        void SCRIPT(char* input, Array<char**> args);
 
         // info/stats
         void INFO(char* input, Array<char**> args);

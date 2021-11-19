@@ -23,6 +23,14 @@ outfile="$(echo $infile | sed 's/cpp/o/g')"
 i686-elf-g++ -w -IInclude -c "Source/Kernel/Core/$infile" -o "Build/Output/Objs/$outfile" -fno-use-cxa-atexit -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -Wno-write-strings -Wno-unused-variable
 done
 
+# Kernel/Programs/
+for file in Source/Kernel/Programs/*.cpp 
+do
+infile=$(basename $file)
+outfile="$(echo $infile | sed 's/cpp/o/g')"
+i686-elf-g++ -w -IInclude -c "Source/Kernel/Programs/$infile" -o "Build/Output/Objs/$outfile" -fno-use-cxa-atexit -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -Wno-write-strings -Wno-unused-variable
+done
+
 # Kernel/Graphics/
 for file in Source/Kernel/Graphics/*.cpp 
 do

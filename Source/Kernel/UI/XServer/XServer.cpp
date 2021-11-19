@@ -7,8 +7,6 @@ namespace PMOS
     {
         namespace XServer
         {
-            UI::Window* test_win;
-
             XServerHost::XServerHost() : Service("xserver", ServiceType::Utility)
             {
 
@@ -40,9 +38,6 @@ namespace PMOS
                 Taskbar = new XTaskbar();
                 Kernel::MemoryMgr.GetEntryFromPtr(Taskbar)->Type = (byte)AllocationType::UI;
                 Taskbar->OnCreate();
-
-                test_win = CreateWindow(128, 128, 320, 240, "Test Window", "testwin");
-                Kernel::WinMgr->Open(test_win);
             }
 
             void XServerHost::Stop()

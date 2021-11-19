@@ -80,20 +80,13 @@ namespace PMOS
         {
             Registers.Reset();
             Halted  = true;
-        }
-
-        void BytecodeProcessor::Load(ExecutableHeader header)
-        {
-            if (header.RAMSize == 0) { Kernel::Debug.Error("Tried to load invalid program"); return; }
-            RAM.Initialize(header.RAMSize);
-            Memory::Copy((void*)&ExecHeader, (void*)&header, sizeof(ExecutableHeader));
-            Reset();
+            Kernel::CLI->Debug.Info("BPU INIT");
         }
 
         void BytecodeProcessor::Reset()
         {
             Registers.Reset();
-            Registers.Write(RegisterID::PC, ExecHeader.CodeAddress);
+            Registers.Write(RegisterID::PC, 0);
             
             StackReset();
             Halted = true;
@@ -103,10 +96,13 @@ namespace PMOS
 
         void BytecodeProcessor::Continue() { Halted = false; }
 
+        bool BytecodeProcessor::IsHalted() { return Halted; }
+
         void BytecodeProcessor::Step()
         {
             if (!Halted)
             {
+                if (Registers.Read(RegisterID::PC) >= RAM.Size) { Halt(); while (true); }
                 byte op = RAM.Read8(Registers.Read(RegisterID::PC));
                 Execute(op);
             }
@@ -123,12 +119,12 @@ namespace PMOS
 
         void BytecodeProcessor::StackReset()
         {
-            Registers.Write(RegisterID::SP, ExecHeader.StackAddress);
+           
         }
 
         void BytecodeProcessor::StackPush(uint val)
         {
-            if (Registers.Read(RegisterID::SP) >= ExecHeader.StackAddress + ExecHeader.StackSize) { Kernel::Debug.Error("VM: Stack overflow exception"); return; }
+            
         }
 
         uint BytecodeProcessor::StackPop()

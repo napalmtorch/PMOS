@@ -127,7 +127,9 @@ namespace PMOS
             }
 
             // calculate total usage
-            CPUUsage = 100.0f - (((float)total_tps / (float)Kernel::IdleThread->GetTPS()) * 100);
+            long double val = (long double)total_tps / (long double)Kernel::IdleThread->GetTPS();
+
+            CPUUsage = ((float)val * 100);
             if (CPUUsage < 0.0f)   { CPUUsage = 0.0f; }
             if (CPUUsage > 100.0f) { CPUUsage = 100.0f; }
         }

@@ -275,7 +275,7 @@ namespace PMOS
                 if (Parent != nullptr) { GetParent(Parent)->InvokeRefresh(); }
             }
             else { InvokeRefresh(); }
-            Kernel::Debug.Info("Event 'OnClick'        invoked : ", Name);
+            //Kernel::Debug.Info("Event 'OnClick'        invoked : ", Name);
         }
 
         void Control::OnMouseDown()
@@ -287,7 +287,7 @@ namespace PMOS
                 if (Parent != nullptr) { GetParent(Parent)->InvokeRefresh(); }
             }
             else { InvokeRefresh(); }
-            Kernel::Debug.Info("Event 'OnMouseDown'    invoked : ", Name);
+            //Kernel::Debug.Info("Event 'OnMouseDown'    invoked : ", Name);
         }
 
         void Control::OnMouseUp()
@@ -299,7 +299,7 @@ namespace PMOS
                 if (Parent != nullptr) { GetParent(Parent)->InvokeRefresh(); }
             }
             else { InvokeRefresh(); }
-            Kernel::Debug.Info("Event 'OnMouseUp'      invoked : ", Name);
+            //Kernel::Debug.Info("Event 'OnMouseUp'      invoked : ", Name);
         }
 
         void Control::OnMouseHover()
@@ -310,7 +310,7 @@ namespace PMOS
         void Control::OnMouseLeave()
         {
             if (MouseLeave != nullptr) { MouseLeave(Parent, this); }
-            Kernel::Debug.Info("Event 'OnMouseLeave'   invoked : ", Name);
+            //Kernel::Debug.Info("Event 'OnMouseLeave'   invoked : ", Name);
         }
 
         void Control::OnMouseEnter()
@@ -320,7 +320,7 @@ namespace PMOS
                 if (Parent != nullptr) { GetParent(Parent)->InvokeRefresh(); }
             }
             else { InvokeRefresh(); }
-            Kernel::Debug.Info("Event 'OnMouseEnter'   invoked : ", Name);
+            //Kernel::Debug.Info("Event 'OnMouseEnter'   invoked : ", Name);
         }
 
 
