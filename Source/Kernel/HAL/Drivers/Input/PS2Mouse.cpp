@@ -87,20 +87,20 @@ namespace PMOS
             void PS2Mouse::OnInterrupt()
             {
                 byte status = Ports::Read8(0x64);
+                Wait(1);
                 if ((!(status & 1)) == 1) { Cycle = 0; return; }
                 if ((!(status & 2)) == 0) { Cycle = 0; return; }
                 if (!(status & 0x20))     { Cycle = 0; return; }
 
-                if (Cycle == 0) { Buffer[0] = Ports::Read8(0x60); }
-                else if (Cycle == 1) { Buffer[1] = Ports::Read8(0x60); }
+                if (Cycle == 0) { Buffer[0] = Read(); }
+                else if (Cycle == 1) { Buffer[1] = Read(); }
                 else if (Cycle == 2)
                 {
-                    Buffer[2] = Ports::Read8(0x60);
+                    Buffer[2] = Read();
                     OnMove(Buffer[1], -Buffer[2]);
                     LeftButton  = ((Buffer[0] & 0b00000001));
                     RightButton = ((Buffer[0] & 0b00000010) >> 1);
                     Cycle = 0;
-                    //for (int i = 0; i < 1000000; i++);
                     return;
                 }
                 else { Kernel::Debug.Error("PS/2 mouse cycle overflow exception"); return; }
