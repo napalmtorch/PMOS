@@ -41,10 +41,8 @@ namespace PMOS
                 RightButton = false;
                 Memory::Set(Buffer, 0, sizeof(Buffer));
 
-                // register interrupt
-                Kernel::InterruptMgr.Register(IRQ12, (ISR)PS2MouseCallback);
-
                 // setup device
+                /*
                 Ports::Write8(0x64, 0xA8);
                 Ports::Write8(0x64, 0x20);
                 byte status = (Ports::Read8(0x60) | 2);
@@ -53,7 +51,30 @@ namespace PMOS
                 Ports::Write8(0x64, 0xD4);
                 Ports::Write8(0x60, 0xF4);
                 (void)Ports::Read8(0x60);
-                Cycle = 0;
+                */
+
+                byte status;
+                Wait(1);
+                Ports::Write8(0x64, 0xA8);
+
+                Wait(1);
+                Ports::Write8(0x64, 0x20);
+                Wait(0);
+                status = (Ports::Read8(0x60) | 2);
+                
+                Wait(1);
+                Ports::Write8(0x64, 0x60);
+                Wait(1);
+                Ports::Write8(0x60, status);
+
+                Write(0xF6);
+                (void)Read();
+
+                Write(0xF4);
+                (void)Read();
+
+                // register interrupt
+                Kernel::InterruptMgr.Register(IRQ12, (ISR)PS2MouseCallback);
             }
 
             void PS2Mouse::Stop()
@@ -79,7 +100,7 @@ namespace PMOS
                     LeftButton  = ((Buffer[0] & 0b00000001));
                     RightButton = ((Buffer[0] & 0b00000010) >> 1);
                     Cycle = 0;
-                    for (int i = 0; i < 1000000; i++);
+                    //for (int i = 0; i < 1000000; i++);
                     return;
                 }
                 else { Kernel::Debug.Error("PS/2 mouse cycle overflow exception"); return; }
@@ -91,6 +112,41 @@ namespace PMOS
             void PS2Mouse::OnMove(sbyte x, sbyte y)
             {
                 SetPosition(Position.X + x, Position.Y + y);
+            }
+
+            void PS2Mouse::Wait(byte a_type)
+            {
+                uint time_out = 100000;
+                if (a_type == 0)
+                {
+                    while (time_out--)
+                    {
+                        if ((Ports::Read8(0x64) & 1) == 1) { return; }
+                    }
+                    return;
+                }
+                else
+                {
+                    while (time_out--)
+                    {
+                        if ((Ports::Read8(0x64) & 2) == 0) { return; }
+                    }
+                    return;
+                }
+            }
+
+            void PS2Mouse::Write(byte a_write)
+            {
+                Wait(1);
+                Ports::Write8(0x64, 0xD4);
+                Wait(1);
+                Ports::Write8(0x60, a_write);
+            }
+
+            byte PS2Mouse::Read()
+            {
+                Wait(0);
+                return Ports::Read8(0x60);
             }
 
             void PS2Mouse::SetPosition(int x, int y)

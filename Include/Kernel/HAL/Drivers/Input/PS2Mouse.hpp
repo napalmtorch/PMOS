@@ -54,6 +54,9 @@ namespace PMOS
 
                 private:
                     void OnMove(sbyte x, sbyte y);
+                    void Wait(byte a_type);
+                    void Write(byte a_write);
+                    byte Read();
 
                 public:
                     void SetPosition(int x, int y);
