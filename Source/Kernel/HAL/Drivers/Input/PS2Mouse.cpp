@@ -53,6 +53,7 @@ namespace PMOS
                 Ports::Write8(0x64, 0xD4);
                 Ports::Write8(0x60, 0xF4);
                 (void)Ports::Read8(0x60);
+                Cycle = 0;
             }
 
             void PS2Mouse::Stop()
@@ -78,6 +79,7 @@ namespace PMOS
                     LeftButton  = ((Buffer[0] & 0b00000001));
                     RightButton = ((Buffer[0] & 0b00000010) >> 1);
                     Cycle = 0;
+                    for (int i = 0; i < 1000000; i++);
                     return;
                 }
                 else { Kernel::Debug.Error("PS/2 mouse cycle overflow exception"); return; }
