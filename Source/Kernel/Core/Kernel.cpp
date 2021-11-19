@@ -58,7 +58,7 @@ namespace PMOS
 
             MemoryMgr = Services::MemoryManager();
             MemoryMgr.Initialize();
-            MemoryMgr.ToggleMessages(true);
+            MemoryMgr.ToggleMessages(false);
 
             ServiceMgr = Services::ServiceManager();
             ServiceMgr.Initialize();
@@ -115,15 +115,15 @@ namespace PMOS
             FileSys = new VFS::FSHost();
             FileSys->Initialize();
 
+            asm volatile("cli");
             Keyboard->Start();
+            asm volatile("sti");
 
             Terminal->Write("PurpleMoon", Col4::Magenta);
             Terminal->WriteLine(" OS");
             Terminal->WriteLine("Version 0.2", Col4::DarkGray);
 
             CLI->Debug.WriteLine("MEM USED: %d bytes(%d MB)", MemoryMgr.GetRAMUsed(), MemoryMgr.GetRAMUsed() / 1024 / 1024);
-
-            Terminal->WriteLine("TEST");
         }
 
         void Run()

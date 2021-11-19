@@ -36,6 +36,25 @@ namespace PMOS
         static const VisualStyle ButtonStyle = 
         {
             "Default",
+            BorderStyle::FixedSingle,
+            1,
+            false,
+            {
+                0xFF121212,         // back color
+                0xFFFFFFFF,         // fore color
+                0xFF7F7F7F,         // border tl
+                0xFF7F7F7F,         // border br inner
+                0xFF7F7F7F,         // border br outer
+                0xFF4F4F4F,
+                0xFF121212,
+                0xFFFFFFFF,
+            },
+            (Font*)&Fonts::Serif8x8,
+        };
+
+        static const VisualStyle ButtonStyleClassic = 
+        {
+            "Default",
             BorderStyle::Fixed3D,
             1,
             false,
@@ -53,6 +72,25 @@ namespace PMOS
         };
 
         static const VisualStyle WindowStyle
+        {
+            "Default",
+            BorderStyle::FixedSingle,
+            1,
+            false,
+            {
+                0xFF121212,         // back color
+                0xFFFFFFFF,         // fore color
+                0xFF7F7F7F,         // border tl
+                0xFF7F7F7F,         // border br inner
+                0xFF7F7F7F,         // border br outer
+                0xFF121212,         // titlebar
+                0xFFFFFFFF,         // titlebar fore color
+                0x00000000,         // unused?
+            },
+            (Font*)&Fonts::Serif8x8,
+        };
+
+        static const VisualStyle WindowStyleClassic
         {
             "Default",
             BorderStyle::Fixed3D,

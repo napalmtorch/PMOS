@@ -334,7 +334,6 @@ namespace PMOS
 
         void Control::SetText(char* text)
         {
-            Kernel::Debug.WriteLine("TEXT: %s", text);
             if (Text != nullptr) { MemFree(Text); }
             if (text != nullptr)
             {

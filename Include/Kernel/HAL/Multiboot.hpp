@@ -34,5 +34,10 @@ namespace PMOS
             uint VBEInterfaceOffset;
             uint VBEInterfaceLength;
         } ATTR_PACK MultibootHeader;
+
+        typedef struct
+        {
+            
+        } __attribute__((packed)) poop_t;
     }
 }

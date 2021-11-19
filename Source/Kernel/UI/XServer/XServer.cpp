@@ -32,8 +32,14 @@ namespace PMOS
                 Kernel::Keyboard->SetStream(nullptr);
 
                 Canvas.Initialize();
-
                 FPSLimit = 60;
+                
+                Wallpaper = new Graphics::Bitmap("/sys/resources/wallpaper.bmp");
+                Wallpaper->Resize(Kernel::VESA->GetWidth(), Kernel::VESA->GetHeight());
+
+                Taskbar = new XTaskbar();
+                Kernel::MemoryMgr.GetEntryFromPtr(Taskbar)->Type = (byte)AllocationType::UI;
+                Taskbar->OnCreate();
 
                 test_win = CreateWindow(128, 128, 320, 240, "Test Window", "testwin");
                 Kernel::WinMgr->Open(test_win);
@@ -42,6 +48,9 @@ namespace PMOS
             void XServerHost::Stop()
             {
                 Service::Stop();
+
+                Taskbar->Dispose();
+                MemFree(Taskbar);
 
                 Kernel::ServiceMgr.Stop(Kernel::WinMgr);
                 MemFree(Canvas.Buffer);
@@ -57,9 +66,11 @@ namespace PMOS
 
                     Kernel::ThreadMgr.CalculateCPUUsage();
 
+                    char temp[64];
                     StringUtil::Clear(FPSString);
-                    StringUtil::FromDecimal(FPS, FPSString);
-                    StringUtil::Append(FPSString, " FPS");
+                    StringUtil::FromDecimal(FPS, temp);
+                    StringUtil::Append(FPSString, "FPS: ");
+                    StringUtil::Append(FPSString, temp);
 
                     LastTime = Time;
                 }
@@ -84,7 +95,7 @@ namespace PMOS
                 }
         
                 // draw
-                if (FPSLimit == 0) { Draw(); }
+                if (FPSLimit == 0) { Draw(); return; }
                 if (DrawTick >= 1000 / FPSLimit) { Draw(); DrawTick = 0; }
             }
 
@@ -92,13 +103,25 @@ namespace PMOS
             {
                 Frames++;
 
-                Canvas.Clear({ 0x5F, 0x00, 0x5F, 0xFF });
+                if (Wallpaper == nullptr) { Canvas.Clear({ 0x5F, 0x00, 0x5F, 0xFF }); }
+                else { Canvas.DrawBitmapFast(0, 0, Wallpaper); }
 
                 Canvas.DrawString(0, 0, FPSString, Colors::White, Fonts::Serif8x8);
 
                 float cpu = Kernel::ThreadMgr.GetCPUUsage();
                 char temp[64];
-                Canvas.DrawString(0, 16, StringUtil::FromFloat(cpu, temp, 4), Colors::White, Fonts::Serif8x8);
+                char temp2[64];
+                StringUtil::FromFloat(cpu, temp, 4);
+                StringUtil::Copy(temp2, "CPU: ");
+                StringUtil::Append(temp2, temp);
+                StringUtil::Append(temp2, "%");
+                Canvas.DrawString(0, 16, temp2, Colors::White, Fonts::Serif8x8);
+
+                if (Taskbar != nullptr)
+                {
+                    Taskbar->Update();
+                    Taskbar->Refresh();
+                }
 
                 if (Kernel::WinMgr != nullptr)
                 {

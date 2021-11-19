@@ -268,7 +268,10 @@ namespace PMOS
             if (Kernel::ThreadMgr.Count == 0) { return; }
 
             // save registers
-            if (ThreadSwitchInit) { Kernel::ThreadMgr.Threads[Kernel::ThreadMgr.CurrentIndex]->Registers = r; }
+            if (ThreadSwitchInit) 
+            { 
+                Kernel::ThreadMgr.Threads[Kernel::ThreadMgr.CurrentIndex]->Registers = r; 
+            }
 
             Kernel::ThreadMgr.CurrentIndex++;
             if (Kernel::ThreadMgr.CurrentIndex >= Kernel::ThreadMgr.Count) { Kernel::ThreadMgr.CurrentIndex = 0; }

@@ -2,6 +2,7 @@
 #include <Kernel/Lib/Types.hpp>
 #include <Kernel/Core/Service.hpp>
 #include <Kernel/Graphics/Graphics.hpp>
+#include <Kernel/UI/XServer/Taskbar.hpp>
 
 namespace PMOS
 {
@@ -13,6 +14,8 @@ namespace PMOS
             {
                 public:
                     Graphics::VESACanvas Canvas;
+                    XTaskbar* Taskbar;
+                    Graphics::Bitmap* Wallpaper;
 
                 private:
                     char FPSString[64];

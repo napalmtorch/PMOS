@@ -3,6 +3,6 @@
         "atomic": "cpp",
         "string": "cpp",
         "ranges": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
     }
 }

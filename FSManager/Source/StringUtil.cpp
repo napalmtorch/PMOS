@@ -33,7 +33,7 @@ namespace StringUtil
 		size_t start;
 		size_t end = 0;
 
-		while ((start = text.find_first_not_of(delim, end)) != std::StringUtil::npos)
+		while ((start = text.find_first_not_of(delim, end)) != std::string::npos)
 		{
 			end = text.find(delim, start);
 		    output.push_back(text.substr(start, end - start));

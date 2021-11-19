@@ -438,7 +438,7 @@ namespace PMOS
                 byte* src = (byte*)(d + (yy * ((Bitmap*)bitmap)->Width));
                 int xx = x;
                 if (xx < 0) { xx = 0; }
-                while (xx + w >= Kernel::VESA->GetWidth()) { xx--; }
+                while (xx + w > Kernel::VESA->GetWidth()) { xx--; }
                 uint real_offset = (xx + ((y + yy) * Kernel::VESA->GetWidth())) * 4;
                 byte* dest = (byte*)((uint)Buffer + real_offset);
                 if (y + yy >= Kernel::VESA->GetHeight()) { return; }
