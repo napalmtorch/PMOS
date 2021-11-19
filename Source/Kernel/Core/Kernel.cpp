@@ -115,9 +115,7 @@ namespace PMOS
             FileSys = new VFS::FSHost();
             FileSys->Initialize();
 
-            asm volatile("cli");
             Keyboard->Start();
-            asm volatile("sti");
 
             Terminal->Write("PurpleMoon", Col4::Magenta);
             Terminal->WriteLine(" OS");

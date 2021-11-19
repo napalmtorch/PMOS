@@ -71,7 +71,7 @@ namespace PMOS
                 CurrentKey = key;
 
                 if (key <= 0x58) { Keymap[(int)key] = true; }
-                else if (key > 0x81 && key < 0xD8) { Keymap[(int)key - 128] = false; }
+                else if (key >= 0x81 && key < 0xD8) { Keymap[(int)key - 128] = false; }
                 
                 if (CurrentStream != nullptr)
                 {

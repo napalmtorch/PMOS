@@ -302,6 +302,8 @@ namespace PMOS
             {
                 Kernel::CLI->Debug.WriteLine("%d", i);
                 i++;
+
+                if (Kernel::Keyboard->IsKeyDown(HAL::Key::Escape)) { break; }
             }
         }
 

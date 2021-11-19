@@ -52,6 +52,8 @@ namespace PMOS
                 Taskbar->Dispose();
                 MemFree(Taskbar);
 
+                if (Wallpaper != nullptr) { Wallpaper->Dispose(); MemFree(Wallpaper); }
+
                 Kernel::ServiceMgr.Stop(Kernel::WinMgr);
                 MemFree(Canvas.Buffer);
             }
