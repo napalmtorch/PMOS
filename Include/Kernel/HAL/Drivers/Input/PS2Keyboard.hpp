@@ -34,7 +34,7 @@ namespace PMOS
                     Stream* CurrentStream;
 
                 private:
-                    bool ShiftDown;
+                    bool LShiftDown, RShiftDown;
                     bool CapsDown;
                     bool EnterHandled;
 

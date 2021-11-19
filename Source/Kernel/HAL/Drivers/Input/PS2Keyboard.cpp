@@ -88,8 +88,10 @@ namespace PMOS
                             if (TerminalOutput) { Kernel::Terminal->Delete(); }
                         }
                     }
-                    else if (key == (byte)KeyPressed::LSHIFT) { ShiftDown = true; }
-                    else if (key == (byte)KeyReleased::LSHIFT) { ShiftDown = false; }
+                    else if (key == (byte)KeyPressed::LSHIFT) { LShiftDown = true; }
+                    else if (key == (byte)KeyPressed::RSHIFT) { RShiftDown = true; }
+                    else if (key == (byte)KeyReleased::LSHIFT) { LShiftDown = false; }
+                    else if (key == (byte)KeyReleased::RSHIFT) { RShiftDown = false; }
                     else if (key == (byte)KeyPressed::CAPS_LOCK) { CapsDown = !CapsDown; }
                     else if (key == (byte)KeyPressed::LCTRL) { }
                     else if (key == (byte)KeyPressed::LALT) { }
@@ -102,7 +104,7 @@ namespace PMOS
                     else if (key < 58)
                     {
                         char ascii = 0;
-                        bool caps = ((ShiftDown && !CapsDown) || (!ShiftDown && CapsDown));
+                        bool caps = (((LShiftDown || RShiftDown) && !CapsDown) || ((!LShiftDown && !RShiftDown) && CapsDown));
 
                         if (caps) { ascii = KBLayoutUS.Uppercase[key]; }
                         else      { ascii = KBLayoutUS.Lowercase[key]; }
